@@ -65,22 +65,3 @@ def getPokemonByStat(stat, amount):
     ).fetchall()
     connection.close()
     return rows
-
-
-
-if __name__ == '__main__':
-    print(getPokemonById(12))
-    print(("\n"*3))
-    #print(getPokemonByType("Ice"))
-
-    #target = input("Enter a pokemon name: ")
-    #pkmn = getPokemonByName(target)
-    #print(pkmn)
-
-    #target = input("Enter a pokemon type: ")
-    #pkmn = getPokemonByType(target)
-    #print(pkmn)
-
-
-    #print("\n"*3)
-    #print(getAllPokemon())
