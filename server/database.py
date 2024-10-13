@@ -4,11 +4,7 @@ def getAllPokemon():
     connection = sqlite3.connect("pokemon.db")
     cursor = connection.cursor()
     rows = cursor.execute(
-        """SELECT
-        id,
-        name,
-        primary_type, 
-        secondary_type
+        """SELECT *
         FROM pokemon"""
     ).fetchall()
     connection.close()
