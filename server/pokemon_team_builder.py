@@ -3,7 +3,7 @@ from flask_cors import CORS
 from sqlalchemy import create_engine
 
 from app.configuration import get_db_connection
-from app.database import get_pokemon_by_type, get_all_pokemon, get_pokemon_by_stat
+from app.database import get_pokemon_by_type, get_all_pokemon, get_pokemon_by_stat, get_pokemon_by_id
 from app.util import Params
 
 app = Flask(__name__)
@@ -41,7 +41,7 @@ def get_pokemon():
     elif str(Params.TYPING) in request.args.keys():
         pokemon_list = get_pokemon_by_type(ENGINE, Params.TYPING, request.args.get(str(Params.TYPING)))
     elif str(Params.ID) in request.args.keys():
-        pokemon_list = get_pokemon_by_type(ENGINE, Params.ID, request.args.get(str(Params.ID)))
+        pokemon_list = get_pokemon_by_id(ENGINE, request.args.get(str(Params.ID)))
 
     data["pokemon"] = pokemon_list
     data["count"] = len(pokemon_list)

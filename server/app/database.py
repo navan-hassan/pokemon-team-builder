@@ -26,6 +26,13 @@ def get_pokemon_by_type(engine, typing, value):
         return [p.as_dict() for p in result]
 
 
+def get_pokemon_by_id(engine: Engine, pokemon_id: int):
+    with Session(engine) as session:
+        stmt = create_statement(Params.ID, pokemon_id)
+        result = session.scalars(stmt)
+        return [p.as_dict() for p in result]
+
+
 def create_statement(param, value):
     match param:
         case Params.HP:
@@ -51,14 +58,6 @@ def create_statement(param, value):
             )
         case Params.ID:
             return select(Pokemon).where(Pokemon.id == value)
-
-
-def get_pokemon_by_id(pokemon_id: int, engine: Engine):
-    with Session(engine) as session:
-        stmt = create_statement(Params.ID, pokemon_id)
-        r = session.scalars(stmt).one_or_none()
-        print(r)
-        return r
 
 
 def initialize_database(connection_string):
