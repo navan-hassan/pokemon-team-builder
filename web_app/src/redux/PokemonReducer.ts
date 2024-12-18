@@ -1,6 +1,6 @@
 import { getPokemonById } from "../api"
 import { createAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import { pokemon, stats, defensive_coverage } from "../interfaces"
+import { pokemon, stats, resistances } from "../interfaces"
 
 export const fetchPokemonByID = createAsyncThunk(
     'FETCH_POKEMON_BY_ID',
@@ -14,7 +14,7 @@ export const fetchPokemonByID = createAsyncThunk(
 interface PokemonState {
     pokemon: pokemon | null
     stats: stats
-    defensive_coverage: defensive_coverage | null
+    resistances: resistances | null
     loading: 'pending' | 'success' | 'failed' | 'idle'
 }
 
@@ -29,7 +29,7 @@ const initialState = {
         speed: 0,
         base_stat_total: 0,
     },
-    defensive_coverage: null,
+    resistances: null,
     loading: 'idle',
 } as PokemonState
 
@@ -49,7 +49,7 @@ const pokemonSlice = createSlice({
             state.loading = 'success';
             state.pokemon = action.payload.pokemon;
             state.stats = action.payload.pokemon.stats;
-            state.defensive_coverage = action.payload.pokemon.defensive_coverage;
+            state.resistances = action.payload.pokemon.resistances;
         })
     }
 })

@@ -1,6 +1,6 @@
 import { createPokemonTeam, getPokemonById } from "../api"
 import { createAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import { pokemon, stats, defensive_coverage, pokemon_team } from "../interfaces"
+import { pokemon, stats, resistances, pokemon_team } from "../interfaces"
 
 export const createTeam = createAsyncThunk(
     'CREATE_POKEMON_TEAM',
@@ -39,7 +39,7 @@ const emptyPokemon: pokemon = {
     name: "None",
     primary_type: "None", 
     secondary_type: "None",
-    defensive_coverage: null,
+    resistances: null,
     stats: emptyStats
 }
 

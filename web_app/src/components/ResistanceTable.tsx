@@ -58,8 +58,8 @@ const ResistanceTable = ({pokemonTeam}:Props) => {
                                     variant="body2"
                                     color={colors[val]}
                                     fontWeight="bold">
-                                        {pokemon && pokemon.defensive_coverage != null && !isEmpty(pokemon)
-                                        ? pokemon.defensive_coverage[val] : ""}
+                                        {pokemon && pokemon.resistances != null && !isEmpty(pokemon)
+                                        ? pokemon.resistances[val] : ""}
                                 </Typography>
                             </TableCell>)
                             }

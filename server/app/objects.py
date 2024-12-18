@@ -5,9 +5,12 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
+
 class Base(DeclarativeBase):
     pass
 
+
+# noinspection SpellCheckingInspection
 class Pokemon(Base):
     __tablename__ = "pokemon"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -20,6 +23,7 @@ class Pokemon(Base):
     hidden_ability: Mapped[Optional[str]] = mapped_column()
     stats: Mapped["Stats"] = relationship(back_populates="pokemon", cascade="all, delete-orphan")
     resistances: Mapped["Resistances"] = relationship(back_populates="pokemon", cascade="all, delete-orphan")
+
     def __repr__(self) -> str:
         return f'''Pokemon(
         id={self.id!r},
@@ -34,6 +38,23 @@ class Pokemon(Base):
         resistances={self.resistances!r}
     )'''
 
+    def as_dict(self, recursive=False):
+        return {
+            "dex_num": self.id,
+            "name": self.name,
+            "primary_type": self.primary_type,
+            "secondary_type": self.secondary_type if self.secondary_type is not None else "None"
+        } if not recursive else {
+            "dex_num": self.id,
+            "name": self.name,
+            "primary_type": self.primary_type,
+            "secondary_type": self.secondary_type if self.secondary_type is not None else "None",
+            "stats": self.stats.as_dict(),
+            "resistances": self.resistances.as_dict()
+        }
+
+
+# noinspection SpellCheckingInspection
 class Resistances(Base):
     __tablename__ = "resistances"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -57,6 +78,7 @@ class Resistances(Base):
     dragon: Mapped[float] = mapped_column()
     dark: Mapped[float] = mapped_column()
     fairy: Mapped[float] = mapped_column()
+
     def __repr__(self) -> str:
         return f'''(
             normal={self.normal!r},
@@ -79,6 +101,30 @@ class Resistances(Base):
             fairy={self.fairy!r}
         )'''
 
+    def as_dict(self):
+        return {
+            "normal": self.normal,
+            "fire": self.fire,
+            "water": self.water,
+            "grass": self.grass,
+            "flying": self.flying,
+            "fighting": self.fighting,
+            "poison": self.poison,
+            "electric": self.electric,
+            "ground": self.ground,
+            "rock": self.rock,
+            "psychic": self.psychic,
+            "ice": self.ice,
+            "bug": self.bug,
+            "ghost": self.ghost,
+            "steel": self.steel,
+            "dragon": self.dragon,
+            "dark": self.dark,
+            "fairy": self.fairy,
+        }
+
+
+# noinspection SpellCheckingInspection
 class Stats(Base):
     __tablename__ = "stats"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -91,6 +137,7 @@ class Stats(Base):
     sp_def: Mapped[int] = mapped_column()
     speed: Mapped[int] = mapped_column()
     base_stat_total: Mapped[int] = mapped_column()
+
     def __repr__(self) -> str:
         return f'''(
             hp={self.hp!r},
@@ -101,3 +148,14 @@ class Stats(Base):
             speed={self.speed!r},
             base_stat_total={self.base_stat_total!r},
         )'''
+
+    def as_dict(self):
+        return {
+            "hp": self.hp,
+            "attack": self.attack,
+            "defense": self.defense,
+            "special_attack": self.sp_atk,
+            "special_defense": self.sp_def,
+            "speed": self.speed,
+            "base_stat_total": self.base_stat_total
+        }

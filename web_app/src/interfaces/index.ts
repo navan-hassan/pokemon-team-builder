@@ -3,7 +3,7 @@ export interface pokemon {
     name: string
     primary_type: string 
     secondary_type: string
-    defensive_coverage: defensive_coverage | null
+    resistances: resistances | null
     stats: stats
 }
 
@@ -21,7 +21,7 @@ export interface pokemon_team {
     [key: number]: (pokemon | null)
 }
 /*
-export interface defensive_coverage {
+export interface resistances {
     normal: number,
     fire: number,
     water: number,
@@ -43,6 +43,6 @@ export interface defensive_coverage {
 }
 */
 
-export interface defensive_coverage {
+export interface resistances {
     [key: string]: number
 }
