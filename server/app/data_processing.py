@@ -1,13 +1,14 @@
+import asyncio
 import json
 import sys
-import asyncio
+
 import aiohttp
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
+from app.configuration import get_data_processing_url, get_data_processing_json_path
 from app.objects import Base, Stats, Pokemon, Resistances
-from app.configuration import get_db_connection
 
-DATABASE_URL = get_db_connection()
+DATABASE_URL = get_data_processing_url()
 
 
 async def insert_db_objects(async_session: async_sessionmaker[AsyncSession], pokemon_list: list[Pokemon]) -> None:
@@ -85,8 +86,8 @@ def parse_request(contents):
         hp=stats_dict["hp"],
         attack=stats_dict["attack"],
         defense=stats_dict["defense"],
-        sp_atk=stats_dict["special-attack"],
-        sp_def=stats_dict["special-defense"],
+        special_attack=stats_dict["special-attack"],
+        special_defense=stats_dict["special-defense"],
         speed=stats_dict["speed"],
         base_stat_total=bst
     )
@@ -275,7 +276,7 @@ def calculate_resistances(type_list):
 
 
 if __name__ == "__main__":
-    list_urls = parse_urls('../tests/test_data/pokemon_api_urls.json')
+    list_urls = parse_urls(get_data_processing_json_path())
 
     # required for aiodns to work in Windows
     if sys.platform == 'win32':
