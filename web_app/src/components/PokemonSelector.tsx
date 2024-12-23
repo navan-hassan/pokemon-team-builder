@@ -1,12 +1,8 @@
-import React, { useEffect, useCallback, useMemo } from "react";
-import { Box, Autocomplete, List, ListItem, Grid, ListItemText, ListItemButton, ListItemAvatar, Avatar, Typography, TextField } from "@mui/material";
+import { Box, Autocomplete, List, ListItem, Grid, TextField } from "@mui/material";
 import { RootState, AppDispatch } from "../redux/index";
-import { fetchAllPokemon } from '../redux/PokemonListReducer';
-import { fetchPokemonByID } from "../redux/PokemonReducer";
-import { addPokemonToTeam } from "../redux/PokemonTeamReducer";
-import { useSelector, connect, ConnectedProps } from 'react-redux'
+import { createTeam } from "../redux/PokemonTeamReducer";
+import { connect, ConnectedProps } from 'react-redux'
 import { pokemon } from "../interfaces";
-import { useAppDispatch } from "../hooks";
 import StatList from "./StatList";
 
 
@@ -19,20 +15,22 @@ const mapStateToProps = (state: RootState) => {
 
 const mapDispatchToProps = (dispatch: AppDispatch) => {
     return {
-        addPokemonToTeam: (index: number, newPokemon: pokemon) => dispatch(addPokemonToTeam({index: index, pokemon: newPokemon}))
-    }
+        createPokemonTeamAction: (team: pokemon[]) => dispatch(createTeam(team))
+    };
 }
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
 
 const isEmptySlot = (pokemon: pokemon) => { 
-  return pokemon.dex_num == -1
+  return pokemon.id == -1
 }
 type Props = ConnectedProps<typeof connector>;
-const PokemonSelector = ({pokemonList, pokemonTeam, addPokemonToTeam}: Props) => {
+const PokemonSelector = ({pokemonList, pokemonTeam, createPokemonTeamAction}: Props) => {
     const handleChange = (index: number, newValue: pokemon | null) => {
       if (newValue != null) {
-        addPokemonToTeam(index, newValue)
+        var newTeam = [...pokemonTeam];
+        newTeam[index] = newValue;
+        createPokemonTeamAction(newTeam)
       }
     }
     return (

@@ -7,6 +7,25 @@ from sqlalchemy.orm import relationship
 from app.util import PokemonStats, PokemonTypes
 
 
+def empty_pokemon_slot():
+    return {
+        "id": -1,
+        "name": "None",
+        "primary_type": "None",
+        "secondary_type": "None",
+        "stats": {
+            PokemonStats.HP: 0,
+            PokemonStats.ATTACK: 0,
+            PokemonStats.DEFENSE: 0,
+            PokemonStats.SPECIAL_ATTACK: 0,
+            PokemonStats.SPECIAL_DEFENSE: 0,
+            PokemonStats.SPEED: 0,
+            PokemonStats.BASE_STAT_TOTAL: 0
+        },
+        "resistances": None
+    }
+
+
 class Base(DeclarativeBase):
     pass
 
@@ -41,12 +60,12 @@ class Pokemon(Base):
 
     def as_dict(self, recursive=False):
         return {
-            "dex_num": self.id,
+            "id": self.id,
             "name": self.name,
             "primary_type": self.primary_type,
             "secondary_type": self.secondary_type if self.secondary_type is not None else "None"
         } if not recursive else {
-            "dex_num": self.id,
+            "id": self.id,
             "name": self.name,
             "primary_type": self.primary_type,
             "secondary_type": self.secondary_type if self.secondary_type is not None else "None",
@@ -188,8 +207,8 @@ class PokemonTeam(Base):
     pokemon_6: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_6])
     avg_stats_id: Mapped[Optional[int]] = mapped_column(ForeignKey("stats.id"))
     avg_stats: Mapped["Stats"] = relationship(foreign_keys=[avg_stats_id])
-    user_id: Mapped[int] = mapped_column((ForeignKey("users.id")))
-    user: Mapped["User"] = relationship(foreign_keys=[user_id], back_populates="teams")
+    user_id: Mapped[Optional[int]] = mapped_column((ForeignKey("users.id")))
+    user: Mapped[Optional["User"]] = relationship(foreign_keys=[user_id], back_populates="teams")
 
     def __repr__(self) -> str:
         return f'''PokemonTeam(
@@ -208,13 +227,21 @@ class PokemonTeam(Base):
         return {
             "id": self.id,
             "User": self.user.username if self.user is not None else None,
-            "Slot_1": self.pokemon_1.as_dict(True) if self.pokemon_1 is not None else "None",
-            "Slot_2": self.pokemon_2.as_dict(True) if self.pokemon_2 is not None else "None",
-            "Slot_3": self.pokemon_3.as_dict(True) if self.pokemon_3 is not None else "None",
-            "Slot_4": self.pokemon_4.as_dict(True) if self.pokemon_4 is not None else "None",
-            "Slot_5": self.pokemon_5.as_dict(True) if self.pokemon_5 is not None else "None",
-            "Slot_6": self.pokemon_6.as_dict(True) if self.pokemon_6 is not None else "None",
-            "stats": self.avg_stats.as_dict() if self.avg_stats is not None else {},
+            "Slot_1": self.pokemon_1.as_dict(True) if self.pokemon_1 is not None else empty_pokemon_slot(),
+            "Slot_2": self.pokemon_2.as_dict(True) if self.pokemon_2 is not None else empty_pokemon_slot(),
+            "Slot_3": self.pokemon_3.as_dict(True) if self.pokemon_3 is not None else empty_pokemon_slot(),
+            "Slot_4": self.pokemon_4.as_dict(True) if self.pokemon_4 is not None else empty_pokemon_slot(),
+            "Slot_5": self.pokemon_5.as_dict(True) if self.pokemon_5 is not None else empty_pokemon_slot(),
+            "Slot_6": self.pokemon_6.as_dict(True) if self.pokemon_6 is not None else empty_pokemon_slot(),
+            "stats": self.avg_stats.as_dict() if self.avg_stats is not None else {
+                PokemonStats.HP: 0,
+                PokemonStats.ATTACK: 0,
+                PokemonStats.DEFENSE: 0,
+                PokemonStats.SPECIAL_ATTACK: 0,
+                PokemonStats.SPECIAL_DEFENSE: 0,
+                PokemonStats.SPEED: 0,
+                PokemonStats.BASE_STAT_TOTAL: 0
+            }
         }
 
     def count(self):

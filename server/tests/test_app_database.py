@@ -92,9 +92,11 @@ class MyTestCase(unittest.TestCase):
         team1 = create_pokemon_team(1, 1, 1, 1, 1, 1, 1)
         team2 = create_pokemon_team(1, 494, 494, 494, 494, 494, 494)
         team3 = create_pokemon_team(2, 4, 3, 676)
+        team4 = create_pokemon_team(slot_1=1, slot_2=100, slot_3=1000, slot_4=122, slot_5=123)
 
         self.assertIsNotNone(team1)
         self.assertIsNotNone(team3)
+        self.assertIsNotNone(team4)
         self.assertEqual(team1['User'], 'some_username')
         self.assertEqual(team1['Slot_2']['name'], 'bulbasaur')
         self.assertEqual(team2['stats'][PokemonStats.HP], 100)

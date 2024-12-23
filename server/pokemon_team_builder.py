@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from app.database import get_pokemon_by_type, get_all_pokemon, get_pokemon_by_stat, get_pokemon_by_id
-from app.database import retrieve_teams_from_user
+from app.database import retrieve_teams_from_user, create_pokemon_team
 from app.util import Params, PokemonStats
 
 app = Flask(__name__)
@@ -54,6 +54,26 @@ def get_teams():
     pokemon_list = retrieve_teams_from_user(request.args.get(Params.USERNAME))
     data["team"] = pokemon_list
     data["count"] = len(pokemon_list)
+    response = jsonify(data)
+    response.headers.set('Access-Control-Allow-Origin', 'http://localhost:5173')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+
+@app.route('/create', methods=['POST'])
+def create_team():
+    request_data = request.get_json()
+    print(request_data)
+    team = create_pokemon_team(
+        slot_1=request_data.get(Params.SLOT_1),
+        slot_2=request_data.get(Params.SLOT_2),
+        slot_3=request_data.get(Params.SLOT_3),
+        slot_4=request_data.get(Params.SLOT_4),
+        slot_5=request_data.get(Params.SLOT_5),
+        slot_6=request_data.get(Params.SLOT_6),
+    )
+    print(team['stats'])
+    data = {'team': team}
     response = jsonify(data)
     response.headers.set('Access-Control-Allow-Origin', 'http://localhost:5173')
     response.headers.add('Access-Control-Allow-Credentials', 'true')

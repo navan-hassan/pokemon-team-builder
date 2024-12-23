@@ -86,7 +86,7 @@ def create_tables():
     Base.metadata.create_all(ENGINE)
 
 
-def create_pokemon_team(user_id: int, slot_1: int = None, slot_2: int = None, slot_3: int = None,
+def create_pokemon_team(user_id: int = None, slot_1: int = None, slot_2: int = None, slot_3: int = None,
                         slot_4: int = None, slot_5: int = None, slot_6: int = None):
     with Session() as session:
         new_team = PokemonTeam(

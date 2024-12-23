@@ -1,10 +1,5 @@
-import React from "react";
 import { List, ListItem, ListItemText } from "@mui/material";
-import { useAppSelector } from "../hooks";
-import { typeList, colors} from "../resources";
-import { connect, ConnectedProps } from "react-redux";
-import { RootState } from "../redux";
-import { pokemon, stats } from "../interfaces";
+import { stats } from "../interfaces";
 
 
 interface Props {

@@ -1,4 +1,3 @@
-import React from "react";
 import { 
     TableContainer,
     Table,
@@ -22,7 +21,7 @@ const mapStateToProps = (state: RootState) => {
 } 
 
 const isEmpty = (pokemon: pokemon) => { 
-    return pokemon.dex_num == -1
+    return pokemon.id == -1
   }
 
 const connector = connect(mapStateToProps);

@@ -1,5 +1,5 @@
 import { getPokemonById } from "../api"
-import { createAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { pokemon, stats, resistances } from "../interfaces"
 
 export const fetchPokemonByID = createAsyncThunk(

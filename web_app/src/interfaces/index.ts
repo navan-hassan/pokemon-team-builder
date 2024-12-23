@@ -1,5 +1,5 @@
 export interface pokemon {
-    dex_num: number 
+    id: number 
     name: string
     primary_type: string 
     secondary_type: string
@@ -18,30 +18,15 @@ export interface stats {
 }
 
 export interface pokemon_team {
-    [key: number]: (pokemon | null)
+    id: number
+    slot_1: pokemon | null
+    slot_2: pokemon | null
+    slot_3: pokemon | null
+    slot_4: pokemon | null
+    slot_5: pokemon | null
+    slot_6: pokemon | null
+    avg_stats: stats | null
 }
-/*
-export interface resistances {
-    normal: number,
-    fire: number,
-    water: number,
-    grass: number,
-    flying: number,
-    fighting: number,
-    poison: number,
-    electric: number,
-    ground: number,
-    rock: number,
-    psychic: number,
-    ice: number,
-    bug: number,
-    ghost: number,
-    steel: number,
-    dragon: number,
-    dark: number,
-    fairy: number
-}
-*/
 
 export interface resistances {
     [key: string]: number
