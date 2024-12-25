@@ -70,9 +70,13 @@ def initialize_database(connection_string) -> Engine:
     return engine
 
 
-def retrieve_user_from_database(username: str) -> User | None:
+def retrieve_user_from_database(username: str) -> dict | None:
     with Session() as session:
-        return session.query(User).filter(User.username == username).first()
+        stmt = select(User).where(User.username == username)
+        user = session.scalars(stmt).first()
+        if user is not None:
+            return user.as_dict()
+        return None
 
 
 def configure_engine(connection_string) -> None:

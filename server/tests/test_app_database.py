@@ -5,7 +5,7 @@ import unittest
 from app.authentication import register_user, login_user
 from app.configuration import get_test_db_connection
 from app.database import *
-from app.util import PokemonStats, PokemonTypes
+from app.util import PokemonStats, PokemonTypes, Params
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='test_app_database.log', level=logging.INFO)
@@ -80,9 +80,18 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(len(test_user.teams) == 0)
 
     def test_login_user(self):
-        self.assertIsNotNone(login_user("some_username", "some_password"))
-        self.assertIsNotNone(login_user("john_smith", "anotherpassword123"))
-        self.assertIsNotNone(login_user("georgewashington", "america1776"))
+        user1 = login_user("some_username", "some_password")
+        self.assertIsNotNone(user1)
+        self.assertEqual(user1[Params.USERNAME], 'some_username')
+
+        user2 = login_user("john_smith", "anotherpassword123")
+        self.assertIsNotNone(user2)
+        self.assertEqual(user2[Params.USERNAME], 'john_smith')
+
+        user3 = login_user("georgewashington", "america1776")
+        self.assertIsNotNone(user3)
+        self.assertEqual(user3[Params.USERNAME], 'georgewashington')
+
         self.assertIsNone(login_user("some_username", "some_pasword"))
         self.assertIsNone(login_user("john_smith", "anotherpassword12"))
         self.assertIsNone(login_user("georgewashington", "nottherightpasssword"))
