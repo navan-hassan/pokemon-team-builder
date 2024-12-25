@@ -32,3 +32,9 @@ export interface pokemon_team {
 export interface resistances {
     [key: string]: number
 }
+
+export interface user {
+    user_id: number,
+    username: string,
+    teams: pokemon_team[]
+}
