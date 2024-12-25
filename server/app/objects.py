@@ -63,12 +63,14 @@ class Pokemon(Base):
             "id": self.id,
             "name": self.name,
             "primary_type": self.primary_type,
-            "secondary_type": self.secondary_type if self.secondary_type is not None else "None"
+            "secondary_type": self.secondary_type if self.secondary_type is not None else "None",
+            "sprite": self.sprite if self.sprite is not None else "None"
         } if not recursive else {
             "id": self.id,
             "name": self.name,
             "primary_type": self.primary_type,
             "secondary_type": self.secondary_type if self.secondary_type is not None else "None",
+            "sprite": self.sprite if self.sprite is not None else "None",
             "stats": self.stats.as_dict(),
             "resistances": self.resistances.as_dict()
         }

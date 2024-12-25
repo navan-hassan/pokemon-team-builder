@@ -4,8 +4,9 @@ import { pokemon, stats } from "../interfaces"
 
 export const createTeam = createAsyncThunk(
     'CREATE_POKEMON_TEAM',
-    async(team: pokemon[], thunkAPI) => {
-        var pokemonTeamDictionary = formatRequest(team);
+    async(team: [number, pokemon[]], thunkAPI) => {
+        var pokemonTeamDictionary = formatRequest(team[1]);
+        pokemonTeamDictionary['id'] = team[0]
         const response = await createPokemonTeam(pokemonTeamDictionary);
         return response.data;
     }
@@ -13,6 +14,7 @@ export const createTeam = createAsyncThunk(
 
 
 interface PokemonTeamState {
+    team_id: number
     team: pokemon[]
     stats: stats
     loading: 'pending' | 'success' | 'failed' | 'idle'
@@ -29,16 +31,18 @@ export const emptyStats: stats = {
 }
 
 const emptyPokemon: pokemon = {
-    id: -1, 
+    id: -1,
     name: "None",
-    primary_type: "None", 
+    primary_type: "None",
     secondary_type: "None",
     resistances: null,
+    sprite: null,
     stats: emptyStats
 }
 
 
 const initialState = {
+    team_id: 1,
     team: [
         emptyPokemon,
         emptyPokemon,
@@ -74,9 +78,6 @@ export const pokemonTeamSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-        .addCase(createTeam.pending, (state) => {
-            state.loading = 'pending'
-        })
         .addCase(createTeam.fulfilled, (state, action) => {
             state.loading = 'success';
             state.team = [

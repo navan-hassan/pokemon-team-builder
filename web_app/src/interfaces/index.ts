@@ -5,6 +5,7 @@ export interface pokemon {
     secondary_type: string
     resistances: resistances | null
     stats: stats
+    sprite: string | null
 }
 
 export interface stats {

@@ -15,6 +15,7 @@ interface PokemonState {
     pokemon: pokemon | null
     stats: stats
     resistances: resistances | null
+    sprite: string | null
     loading: 'pending' | 'success' | 'failed' | 'idle'
 }
 
@@ -31,6 +32,7 @@ const initialState = {
     },
     resistances: null,
     loading: 'idle',
+    sprite: null
 } as PokemonState
 
 const pokemonSlice = createSlice({
@@ -48,6 +50,7 @@ const pokemonSlice = createSlice({
         .addCase(fetchPokemonByID.fulfilled, (state, action) => {
             state.loading = 'success';
             state.pokemon = action.payload.pokemon;
+            state.sprite = action.payload.pokemon.sprite;
             state.stats = action.payload.pokemon.stats;
             state.resistances = action.payload.pokemon.resistances;
         })

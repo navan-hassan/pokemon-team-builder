@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from app.database import get_pokemon_by_type, get_all_pokemon, get_pokemon_by_stat, get_pokemon_by_id
+from app.database import get_pokemon_by_type, get_all_pokemon, get_pokemon_by_stat, get_pokemon_by_id, does_team_exist, \
+    update_pokemon_team
 from app.database import retrieve_teams_from_user, create_pokemon_team
 from app.util import Params, PokemonStats
 
@@ -64,14 +65,26 @@ def get_teams():
 def create_team():
     request_data = request.get_json()
     print(request_data)
-    team = create_pokemon_team(
-        slot_1=request_data.get(Params.SLOT_1),
-        slot_2=request_data.get(Params.SLOT_2),
-        slot_3=request_data.get(Params.SLOT_3),
-        slot_4=request_data.get(Params.SLOT_4),
-        slot_5=request_data.get(Params.SLOT_5),
-        slot_6=request_data.get(Params.SLOT_6),
-    )
+
+    if does_team_exist(request_data.get('id')):
+        team = update_pokemon_team(
+            team_id=request_data.get('id'),
+            slot_1=request_data.get(Params.SLOT_1),
+            slot_2=request_data.get(Params.SLOT_2),
+            slot_3=request_data.get(Params.SLOT_3),
+            slot_4=request_data.get(Params.SLOT_4),
+            slot_5=request_data.get(Params.SLOT_5),
+            slot_6=request_data.get(Params.SLOT_6),
+        )
+    else:
+        team = create_pokemon_team(
+            slot_1=request_data.get(Params.SLOT_1),
+            slot_2=request_data.get(Params.SLOT_2),
+            slot_3=request_data.get(Params.SLOT_3),
+            slot_4=request_data.get(Params.SLOT_4),
+            slot_5=request_data.get(Params.SLOT_5),
+            slot_6=request_data.get(Params.SLOT_6),
+        )
     print(team['stats'])
     data = {'team': team}
     response = jsonify(data)

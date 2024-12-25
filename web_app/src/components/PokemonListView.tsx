@@ -1,11 +1,9 @@
-import React, { useEffect, useCallback, useMemo } from "react";
-import { List, ListItem, ListItemText, ListItemButton, ListItemAvatar, Avatar, Typography } from "@mui/material";
+import React, {  } from "react";
+import { List, ListItem, ListItemText, ListItemButton, Typography } from "@mui/material";
 import { RootState, AppDispatch } from "../redux/index";
 import { fetchAllPokemon } from '../redux/PokemonListReducer';
 import { fetchPokemonByID } from "../redux/PokemonReducer";
-import { useSelector, connect, ConnectedProps } from 'react-redux'
-import { pokemon } from "../interfaces";
-import { useAppDispatch } from "../hooks";
+import { connect, ConnectedProps } from 'react-redux'
 
 
 const mapStateToProps = (state: RootState) => {
@@ -37,7 +35,7 @@ const PokemonListView = ({pokemonList, fetchAllPokemon, fetchPokemonByID}: Props
         <List sx={{
             width: '100%',
             height: '90vh',
-            bgcolor: '#d8dee9',
+            bgcolor: '#eceff4',
             position: 'relative',
             overflow: 'auto',
             }}>

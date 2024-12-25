@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, select, or_
+from sqlalchemy import create_engine, select, or_, Engine, Select
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
@@ -10,31 +10,31 @@ ENGINE = create_engine(get_db_connection())
 Session = sessionmaker(bind=ENGINE)
 
 
-def get_all_pokemon():
+def get_all_pokemon() -> list[dict]:
     with Session() as session:
         stmt = select(Pokemon)
         return [pokemon.as_dict() for pokemon in session.scalars(stmt).all()]
 
 
-def get_pokemon_by_stat(stat, value):
+def get_pokemon_by_stat(stat, value) -> list[dict]:
     with Session() as session:
         stmt = create_statement(stat, value)
         return [stats.pokemon.as_dict(True) for stats in session.scalars(stmt).all()]
 
 
-def get_pokemon_by_type(pokemon_type: str | PokemonTypes):
+def get_pokemon_by_type(pokemon_type: str | PokemonTypes) -> list[dict]:
     with Session() as session:
         stmt = select(Pokemon).filter(or_(Pokemon.primary_type == pokemon_type, Pokemon.secondary_type == pokemon_type))
         return [pokemon.as_dict(True) for pokemon in session.scalars(stmt).all()]
 
 
-def get_pokemon_by_id(pokemon_id: int):
+def get_pokemon_by_id(pokemon_id: int) -> list[dict]:
     with Session() as session:
         stmt = select(Pokemon).where(Pokemon.id == pokemon_id)
         return [pokemon.as_dict(True) for pokemon in session.scalars(stmt).all()]
 
 
-def create_statement(param, value):
+def create_statement(param, value) -> Select:
     match param:
         case PokemonStats.HP:
             return select(Stats).filter(Stats.hp >= value).join(Pokemon)
@@ -52,30 +52,30 @@ def create_statement(param, value):
             return select(Stats).filter(Stats.base_stat_total >= value).join(Pokemon)
 
 
-def is_username_taken(username: str):
+def is_username_taken(username: str) -> bool:
     with Session() as session:
         return session.query(User.username).filter_by(username=username).scalar() is not None
 
 
-def add_user_to_database(user: User):
+def add_user_to_database(user: User) -> None:
     with Session() as session:
         session.add_all([user])
         session.commit()
 
 
-def initialize_database(connection_string):
+def initialize_database(connection_string) -> Engine:
     engine = create_engine(connection_string, echo=True)
     if not database_exists(engine.url):
         create_database(engine.url)
     return engine
 
 
-def retrieve_user_from_database(username: str):
+def retrieve_user_from_database(username: str) -> User | None:
     with Session() as session:
         return session.query(User).filter(User.username == username).first()
 
 
-def configure_engine(connection_string):
+def configure_engine(connection_string) -> None:
     global ENGINE
     global Session
     ENGINE = create_engine(connection_string)
@@ -86,8 +86,62 @@ def create_tables():
     Base.metadata.create_all(ENGINE)
 
 
+def does_team_exist(team_id: int) -> bool:
+    with Session() as session:
+        return session.query(PokemonTeam.id).filter_by(id=team_id).scalar() is not None
+
+
+def update_pokemon_team(team_id: int, user_id: int = None, slot_1: int = None, slot_2: int = None, slot_3: int = None,
+                        slot_4: int = None, slot_5: int = None, slot_6: int = None) -> dict:
+    with Session() as session:
+        team = session.query(PokemonTeam).filter_by(id=team_id).scalar()
+        stats = team.avg_stats
+
+        team.slot_1 = slot_1
+        team.slot_2 = slot_2
+        team.slot_3 = slot_3
+        team.slot_4 = slot_4
+        team.slot_5 = slot_5
+        team.slot_6 = slot_6
+
+        stats.hp = 0
+        stats.attack = 0
+        stats.defense = 0
+        stats.special_attack = 0
+        stats.special_defense = 0
+        stats.speed = 0
+        stats.base_stat_total = 0
+
+        pokemon_list = [team.pokemon_1, team.pokemon_2, team.pokemon_3,
+                        team.pokemon_4, team.pokemon_5, team.pokemon_6]
+
+        for pokemon in pokemon_list:
+            if pokemon is None or pokemon.stats is None:
+                continue
+            stats.hp += pokemon.stats.hp
+            stats.attack += pokemon.stats.attack
+            stats.defense += pokemon.stats.defense
+            stats.special_attack += pokemon.stats.special_attack
+            stats.special_defense += pokemon.stats.special_defense
+            stats.speed += pokemon.stats.speed
+            stats.base_stat_total += pokemon.stats.base_stat_total
+
+        team_size = team.count()
+        stats.hp = round(stats.hp / team_size)
+        stats.attack = round(stats.attack / team_size)
+        stats.defense = round(stats.defense / team_size)
+        stats.special_attack = round(stats.special_attack / team_size)
+        stats.special_defense = round(stats.special_defense / team_size)
+        stats.speed = round(stats.speed / team_size)
+        stats.base_stat_total = round(stats.base_stat_total / team_size)
+
+        session.commit()
+
+        return team.as_dict()
+
+
 def create_pokemon_team(user_id: int = None, slot_1: int = None, slot_2: int = None, slot_3: int = None,
-                        slot_4: int = None, slot_5: int = None, slot_6: int = None):
+                        slot_4: int = None, slot_5: int = None, slot_6: int = None) -> dict:
     with Session() as session:
         new_team = PokemonTeam(
             user_id=user_id,
@@ -141,7 +195,7 @@ def create_pokemon_team(user_id: int = None, slot_1: int = None, slot_2: int = N
         return new_team.as_dict()
 
 
-def retrieve_teams_from_user(username: str):
+def retrieve_teams_from_user(username: str) -> list[dict]:
     with Session() as session:
         user = session.query(User).filter(User.username == username).first()
         if user is None:

@@ -110,6 +110,10 @@ class MyTestCase(unittest.TestCase):
         for team in teams:
             self.assertEqual(team['User'], 'some_username')
 
+    def test_update_pokemon_team(self):
+        team = update_pokemon_team(team_id=6, slot_1=2, slot_2=2, slot_3=2)
+        print(team)
+
 
 if __name__ == '__main__':
     logger.info('Starting tests...\n')

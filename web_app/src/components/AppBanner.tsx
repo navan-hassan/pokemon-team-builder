@@ -1,14 +1,13 @@
-import React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 
 
 const AppBanner = () => {
     return (
         <Box sx={{ display: 'flex' }}>
-            <AppBar position="sticky" sx={{backgroundColor: "#282a36"}}>
+            <AppBar position="sticky" sx={{backgroundColor: "#e5e9f0"}}>
                 <Toolbar>
                     <Typography
                         variant="h5"
@@ -16,11 +15,11 @@ const AppBanner = () => {
                             flexGrow: 1,
                             fontWeight: 'bold',
                             letterSpacing: '.1rem',
-                            color: '#f8f8f2',
+                            color: '#2e3440',
                             textDecoration: 'none',
                             margin: 'margin-left',
                         }}>
-                        Pokémon Team Analyzer
+                        Pokémon Team Builder
                     </Typography>
                 </Toolbar>
             </AppBar>
