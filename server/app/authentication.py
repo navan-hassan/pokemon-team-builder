@@ -1,19 +1,26 @@
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
 from app.objects import User
-from app.database import is_username_taken, retrieve_user_from_database
+from app.database import is_username_taken, retrieve_user_from_database, retrieve_teams_from_user
+from app.util import Params
+
 PASSWORD_HASHER = PasswordHasher()
 
 
-def login_user(username, password_to_verify) -> User | None:
+def login_user(username, password_to_verify) -> dict | None:
     if not is_username_taken(username=username):
         return None
     user = retrieve_user_from_database(username)
     try:
-        PASSWORD_HASHER.verify(user.password, password_to_verify)
+        PASSWORD_HASHER.verify(user[Params.PASSWORD], password_to_verify)
     except VerificationError as e:
         return None
-    return user
+
+    teams = retrieve_teams_from_user(user[Params.USERNAME])
+    return {
+        Params.USERNAME: user[Params.USERNAME],
+        Params.TEAMS: teams
+    }
 
 
 def register_user(username, password):

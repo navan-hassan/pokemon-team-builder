@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from app.util import PokemonStats, PokemonTypes
+from app.util import PokemonStats, PokemonTypes, Params
 
 
 def empty_pokemon_slot():
@@ -190,6 +190,13 @@ class User(Base):
     password: Mapped[str] = mapped_column()
     teams: Mapped[list["PokemonTeam"]] = relationship(back_populates="user",
                                                       cascade="all, delete-orphan")
+
+    def as_dict(self):
+        return {
+            Params.USERNAME: self.username,
+            Params.PASSWORD: self.password,
+            Params.ID: self.id
+        }
 
 
 class PokemonTeam(Base):
