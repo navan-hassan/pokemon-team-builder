@@ -1,11 +1,48 @@
-from enum import Enum
+from enum import Enum, IntEnum, StrEnum
 
 
-class Params(str, Enum):
+class StrValues(StrEnum):
     TYPE = "type"
     ID = 'id'
+    NAME = 'name'
+    PRIMARY_TYPE = 'primary_type'
+    SECONDARY_TYPE = 'secondary_type'
+    STATS = 'stats'
+    RESISTANCES = 'resistances'
     USERNAME = 'username'
     PASSWORD = 'password'
+    ABILITY_1 = 'ability1'
+    ABILITY_2 = 'ability2'
+    HIDDEN_ABILITY = 'hidden_ability'
+    SPRITE = 'sprite'
+    TEAM = 'team'
+    TEAMS = 'teams'
+    SLOT_1 = 'slot_1'
+    SLOT_2 = 'slot_2'
+    SLOT_3 = 'slot_3'
+    SLOT_4 = 'slot_4'
+    SLOT_5 = 'slot_5'
+    SLOT_6 = 'slot_6'
+    USER = 'user'
+    NONE = 'none'
+    COUNT = 'count'
+
+
+class Tablenames(StrEnum):
+    POKEMON = 'pokemon'
+    RESISTANCES = 'resistances'
+    STATS = 'stats'
+    USERS = 'users'
+    TEAMS = 'teams'
+
+
+class Params(StrEnum):
+    TYPE = "type"
+    ID = 'id'
+    COUNT = 'count'
+    USERNAME = 'username'
+    PASSWORD = 'password'
+    TEAM = 'team'
     TEAMS = 'teams'
     SLOT_1 = 'slot_1'
     SLOT_2 = 'slot_2'
@@ -57,7 +94,7 @@ class ErrorMessage(dict, Enum):
     }
 
 
-class ResponseCode(int, Enum):
+class ResponseCode(IntEnum):
     SUCCESS = 200
     INVALID_CREDENTIALS = 401
     USERNAME_TAKEN = 409

@@ -10,6 +10,15 @@ ENGINE = create_engine(get_db_connection())
 Session = sessionmaker(bind=ENGINE)
 
 
+class DataContext:
+    engine = None
+    session_factory = None
+
+    def __init__(self, connection_string):
+        self.engine = create_engine(connection_string)
+        self.session_factory = sessionmaker(self.engine)
+
+
 def get_all_pokemon() -> list[dict]:
     with Session() as session:
         stmt = select(Pokemon)
@@ -24,14 +33,19 @@ def get_pokemon_by_stat(stat, value) -> list[dict]:
 
 def get_pokemon_by_type(pokemon_type: str | PokemonTypes) -> list[dict]:
     with Session() as session:
-        stmt = select(Pokemon).filter(or_(Pokemon.primary_type == pokemon_type, Pokemon.secondary_type == pokemon_type))
-        return [pokemon.as_dict(True) for pokemon in session.scalars(stmt).all()]
+        stmt = select(Pokemon).filter(
+            or_(
+                Pokemon.primary_type == pokemon_type,
+                Pokemon.secondary_type == pokemon_type
+            )
+        )
+        return [pokemon.as_dict(recursive=True) for pokemon in session.scalars(stmt).all()]
 
 
 def get_pokemon_by_id(pokemon_id: int) -> list[dict]:
     with Session() as session:
         stmt = select(Pokemon).where(Pokemon.id == pokemon_id)
-        return [pokemon.as_dict(True) for pokemon in session.scalars(stmt).all()]
+        return [pokemon.as_dict(recursive=True) for pokemon in session.scalars(stmt).all()]
 
 
 def create_statement(param, value) -> Select:
@@ -95,11 +109,41 @@ def does_team_exist(team_id: int) -> bool:
         return session.query(PokemonTeam.id).filter_by(id=team_id).scalar() is not None
 
 
-def update_pokemon_team(team_id: int, user_id: int = None, slot_1: int = None, slot_2: int = None, slot_3: int = None,
+def calculate_average_stats(team: PokemonTeam) -> None:
+    stats = team.avg_stats
+    stats.hp = 0
+    stats.attack = 0
+    stats.defense = 0
+    stats.special_attack = 0
+    stats.special_defense = 0
+    stats.speed = 0
+    stats.base_stat_total = 0
+
+    for pokemon in (team.pokemon_1, team.pokemon_2, team.pokemon_3, team.pokemon_4, team.pokemon_5, team.pokemon_6):
+        if pokemon is None or pokemon.stats is None:
+            continue
+        stats.hp += pokemon.stats.hp
+        stats.attack += pokemon.stats.attack
+        stats.defense += pokemon.stats.defense
+        stats.special_attack += pokemon.stats.special_attack
+        stats.special_defense += pokemon.stats.special_defense
+        stats.speed += pokemon.stats.speed
+        stats.base_stat_total += pokemon.stats.base_stat_total
+
+    team_size = team.count()
+    stats.hp = round(stats.hp / team_size)
+    stats.attack = round(stats.attack / team_size)
+    stats.defense = round(stats.defense / team_size)
+    stats.special_attack = round(stats.special_attack / team_size)
+    stats.special_defense = round(stats.special_defense / team_size)
+    stats.speed = round(stats.speed / team_size)
+    stats.base_stat_total = round(stats.base_stat_total / team_size)
+
+
+def update_pokemon_team(team_id: int, slot_1: int = None, slot_2: int = None, slot_3: int = None,
                         slot_4: int = None, slot_5: int = None, slot_6: int = None) -> dict:
     with Session() as session:
         team = session.query(PokemonTeam).filter_by(id=team_id).scalar()
-        stats = team.avg_stats
 
         team.slot_1 = slot_1
         team.slot_2 = slot_2
@@ -108,36 +152,7 @@ def update_pokemon_team(team_id: int, user_id: int = None, slot_1: int = None, s
         team.slot_5 = slot_5
         team.slot_6 = slot_6
 
-        stats.hp = 0
-        stats.attack = 0
-        stats.defense = 0
-        stats.special_attack = 0
-        stats.special_defense = 0
-        stats.speed = 0
-        stats.base_stat_total = 0
-
-        pokemon_list = [team.pokemon_1, team.pokemon_2, team.pokemon_3,
-                        team.pokemon_4, team.pokemon_5, team.pokemon_6]
-
-        for pokemon in pokemon_list:
-            if pokemon is None or pokemon.stats is None:
-                continue
-            stats.hp += pokemon.stats.hp
-            stats.attack += pokemon.stats.attack
-            stats.defense += pokemon.stats.defense
-            stats.special_attack += pokemon.stats.special_attack
-            stats.special_defense += pokemon.stats.special_defense
-            stats.speed += pokemon.stats.speed
-            stats.base_stat_total += pokemon.stats.base_stat_total
-
-        team_size = team.count()
-        stats.hp = round(stats.hp / team_size)
-        stats.attack = round(stats.attack / team_size)
-        stats.defense = round(stats.defense / team_size)
-        stats.special_attack = round(stats.special_attack / team_size)
-        stats.special_defense = round(stats.special_defense / team_size)
-        stats.speed = round(stats.speed / team_size)
-        stats.base_stat_total = round(stats.base_stat_total / team_size)
+        calculate_average_stats(team)
 
         session.commit()
 
@@ -170,30 +185,9 @@ def create_pokemon_team(user_id: int = None, slot_1: int = None, slot_2: int = N
         session.add_all([avg_stats, new_team])
         session.commit()
 
-        pokemon_list = [new_team.pokemon_1, new_team.pokemon_2, new_team.pokemon_3,
-                        new_team.pokemon_4, new_team.pokemon_5, new_team.pokemon_6]
-
-        for pokemon in pokemon_list:
-            if pokemon is None or pokemon.stats is None:
-                continue
-            avg_stats.hp += pokemon.stats.hp
-            avg_stats.attack += pokemon.stats.attack
-            avg_stats.defense += pokemon.stats.defense
-            avg_stats.special_attack += pokemon.stats.special_attack
-            avg_stats.special_defense += pokemon.stats.special_defense
-            avg_stats.speed += pokemon.stats.speed
-            avg_stats.base_stat_total += pokemon.stats.base_stat_total
-
-        team_size = new_team.count()
-        avg_stats.hp = round(avg_stats.hp / team_size)
-        avg_stats.attack = round(avg_stats.attack / team_size)
-        avg_stats.defense = round(avg_stats.defense / team_size)
-        avg_stats.special_attack = round(avg_stats.special_attack / team_size)
-        avg_stats.special_defense = round(avg_stats.special_defense / team_size)
-        avg_stats.speed = round(avg_stats.speed / team_size)
-        avg_stats.base_stat_total = round(avg_stats.base_stat_total / team_size)
-
         new_team.avg_stats_id = avg_stats.id
+        calculate_average_stats(new_team)
+
         session.commit()
 
         return new_team.as_dict()
