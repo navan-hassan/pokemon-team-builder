@@ -34,12 +34,12 @@ class Pokemon(Base):
     __tablename__ = Tablenames.POKEMON
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
-    sprite: Mapped[Optional[str]] = mapped_column()
+    sprite: Mapped[str | None] = mapped_column()
     primary_type: Mapped[str] = mapped_column()
-    secondary_type: Mapped[Optional[str]] = mapped_column()
+    secondary_type: Mapped[str | None] = mapped_column()
     ability1: Mapped[str] = mapped_column()
-    ability2: Mapped[Optional[str]] = mapped_column()
-    hidden_ability: Mapped[Optional[str]] = mapped_column()
+    ability2: Mapped[str | None] = mapped_column()
+    hidden_ability: Mapped[str | None] = mapped_column()
     stats: Mapped["Stats"] = relationship(back_populates=Tablenames.POKEMON)
     resistances: Mapped["Resistances"] = relationship(back_populates=Tablenames.POKEMON, cascade="all, delete-orphan")
 
@@ -57,23 +57,23 @@ class Pokemon(Base):
         {StrValues.RESISTANCES}={self.resistances!r}
     )'''
 
-    def as_dict(self, *, recursive=False):
+    def as_dict(self, *, recursive: bool=False):
         return {
-            {StrValues.ID}: self.id,
-            {StrValues.NAME}: self.name,
-            {StrValues.PRIMARY_TYPE}: self.primary_type,
-            {StrValues.SECONDARY_TYPE}: self.secondary_type
+            StrValues.ID: self.id,
+            StrValues.NAME: self.name,
+            StrValues.PRIMARY_TYPE: self.primary_type,
+            StrValues.SECONDARY_TYPE: self.secondary_type
             if self.secondary_type is not None else StrValues.NONE,
-            {StrValues.SPRITE}: self.sprite
+            StrValues.SPRITE: self.sprite
             if self.sprite is not None else StrValues.NONE
         } if not recursive else {
-            {StrValues.ID}: self.id,
-            {StrValues.NAME}: self.name,
-            {StrValues.PRIMARY_TYPE}: self.primary_type,
-            {StrValues.SECONDARY_TYPE}: self.secondary_type if self.secondary_type is not None else StrValues.NONE,
-            {StrValues.SPRITE}: self.sprite if self.sprite is not None else StrValues.NONE,
-            {StrValues.STATS}: self.stats.as_dict(),
-            {StrValues.RESISTANCES}: self.resistances.as_dict()
+            StrValues.ID: self.id,
+            StrValues.NAME: self.name,
+            StrValues.PRIMARY_TYPE: self.primary_type,
+            StrValues.SECONDARY_TYPE: self.secondary_type if self.secondary_type is not None else StrValues.NONE,
+            StrValues.SPRITE: self.sprite if self.sprite is not None else StrValues.NONE,
+            StrValues.STATS: self.stats.as_dict(),
+            StrValues.RESISTANCES: self.resistances.as_dict()
         }
 
 
@@ -124,7 +124,7 @@ class Resistances(Base):
             {PokemonTypes.FAIRY}={self.fairy!r}
         )'''
 
-    def as_dict(self):
+    def as_dict(self) -> dict[str, float]:
         return {
             PokemonTypes.NORMAL: self.normal,
             PokemonTypes.FIRE: self.fire,
@@ -151,7 +151,7 @@ class Resistances(Base):
 class Stats(Base):
     __tablename__ = Tablenames.STATS
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    pokemon_id: Mapped[Optional[int]] = mapped_column(ForeignKey("pokemon.id"))
+    pokemon_id: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
     pokemon: Mapped["Pokemon"] = relationship(back_populates=Tablenames.STATS)
     hp: Mapped[int] = mapped_column()
     attack: Mapped[int] = mapped_column()
@@ -172,7 +172,7 @@ class Stats(Base):
             {PokemonStats.BASE_STAT_TOTAL}={self.base_stat_total!r},
         )'''
 
-    def as_dict(self):
+    def as_dict(self) -> dict[str, int]:
         return {
             PokemonStats.HP: self.hp,
             PokemonStats.ATTACK: self.attack,
@@ -192,7 +192,7 @@ class User(Base):
     teams: Mapped[list["PokemonTeam"]] = relationship(back_populates="user",
                                                       cascade="all, delete-orphan")
 
-    def as_dict(self):
+    def as_dict(self) -> dict[str , str | int]:
         return {
             Params.USERNAME: self.username,
             Params.ID: self.id
@@ -202,21 +202,21 @@ class User(Base):
 class PokemonTeam(Base):
     __tablename__ = Tablenames.TEAMS
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    slot_1: Mapped[Optional[int]] = mapped_column(ForeignKey("pokemon.id"))
+    slot_1: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
     pokemon_1: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_1])
-    slot_2: Mapped[Optional[int]] = mapped_column(ForeignKey("pokemon.id"))
+    slot_2: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
     pokemon_2: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_2])
-    slot_3: Mapped[Optional[int]] = mapped_column(ForeignKey("pokemon.id"))
+    slot_3: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
     pokemon_3: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_3])
-    slot_4: Mapped[Optional[int]] = mapped_column(ForeignKey("pokemon.id"))
+    slot_4: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
     pokemon_4: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_4])
-    slot_5: Mapped[Optional[int]] = mapped_column(ForeignKey("pokemon.id"))
+    slot_5: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
     pokemon_5: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_5])
-    slot_6: Mapped[Optional[int]] = mapped_column(ForeignKey("pokemon.id"))
+    slot_6: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
     pokemon_6: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_6])
-    avg_stats_id: Mapped[Optional[int]] = mapped_column(ForeignKey("stats.id"))
+    avg_stats_id: Mapped[int | None] = mapped_column(ForeignKey("stats.id"))
     avg_stats: Mapped["Stats"] = relationship(foreign_keys=[avg_stats_id])
-    user_id: Mapped[Optional[int]] = mapped_column((ForeignKey("users.id")))
+    user_id: Mapped[int | None] = mapped_column((ForeignKey("users.id")))
     user: Mapped[Optional["User"]] = relationship(foreign_keys=[user_id], back_populates=Tablenames.TEAMS)
 
     def __repr__(self) -> str:
@@ -232,16 +232,16 @@ class PokemonTeam(Base):
         {StrValues.STATS}={self.avg_stats if self.avg_stats is not None else StrValues.NONE!r},
     )'''
 
-    def as_dict(self) -> dict:
+    def as_dict(self):
         return {
             StrValues.ID: self.id,
             StrValues.USER: self.user.username if self.user is not None else None,
-            StrValues.SLOT_1: self.pokemon_1.as_dict(True) if self.pokemon_1 is not None else EMPTY_SLOT,
-            StrValues.SLOT_2: self.pokemon_2.as_dict(True) if self.pokemon_2 is not None else EMPTY_SLOT,
-            StrValues.SLOT_3: self.pokemon_3.as_dict(True) if self.pokemon_3 is not None else EMPTY_SLOT,
-            StrValues.SLOT_4: self.pokemon_4.as_dict(True) if self.pokemon_4 is not None else EMPTY_SLOT,
-            StrValues.SLOT_5: self.pokemon_5.as_dict(True) if self.pokemon_5 is not None else EMPTY_SLOT,
-            StrValues.SLOT_6: self.pokemon_6.as_dict(True) if self.pokemon_6 is not None else EMPTY_SLOT,
+            StrValues.SLOT_1: self.pokemon_1.as_dict(recursive=True) if self.pokemon_1 is not None else EMPTY_SLOT,
+            StrValues.SLOT_2: self.pokemon_2.as_dict(recursive=True) if self.pokemon_2 is not None else EMPTY_SLOT,
+            StrValues.SLOT_3: self.pokemon_3.as_dict(recursive=True) if self.pokemon_3 is not None else EMPTY_SLOT,
+            StrValues.SLOT_4: self.pokemon_4.as_dict(recursive=True) if self.pokemon_4 is not None else EMPTY_SLOT,
+            StrValues.SLOT_5: self.pokemon_5.as_dict(recursive=True) if self.pokemon_5 is not None else EMPTY_SLOT,
+            StrValues.SLOT_6: self.pokemon_6.as_dict(recursive=True) if self.pokemon_6 is not None else EMPTY_SLOT,
             StrValues.STATS: self.avg_stats.as_dict() if self.avg_stats is not None else {
                 PokemonStats.HP: 0,
                 PokemonStats.ATTACK: 0,
@@ -261,5 +261,5 @@ class PokemonTeam(Base):
 
         return num_pokemon
 
-    def slots(self) -> Optional[Iterator[int]]:
+    def slots(self) -> Iterator[int | None]:
         yield from (self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6)

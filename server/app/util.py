@@ -52,7 +52,7 @@ class Params(StrEnum):
     SLOT_6 = 'slot_6'
 
 
-class PokemonTypes(str, Enum):
+class PokemonTypes(StrEnum):
     NORMAL = "normal"
     FIRE = "fire"
     WATER = "water"
@@ -73,7 +73,7 @@ class PokemonTypes(str, Enum):
     FAIRY = "fairy"
 
 
-class PokemonStats(str, Enum):
+class PokemonStats(StrEnum):
     HP = "hp"
     ATTACK = "attack"
     DEFENSE = "defense"
@@ -83,7 +83,7 @@ class PokemonStats(str, Enum):
     BASE_STAT_TOTAL = "base_stat_total"
 
 
-class ErrorMessage(dict, Enum):
+class ErrorMessage(dict[str, str], Enum):
     USERNAME_TAKEN = {
         "error": "Conflict",
         "message": "Username is already taken."

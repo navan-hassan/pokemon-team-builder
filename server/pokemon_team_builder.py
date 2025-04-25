@@ -54,7 +54,11 @@ def get_pokemon():
 @app.route('/teams', methods=['GET'])
 def get_teams():
     data = {}
-    pokemon_list = retrieve_teams_from_user(request.args.get(Params.USERNAME))
+    user = request.args.get(Params.USERNAME)
+    if user is None:
+        pokemon_list = []
+    else:
+        pokemon_list = retrieve_teams_from_user(user)
     data["team"] = pokemon_list
     data["count"] = len(pokemon_list)
     response = jsonify(data)
@@ -125,6 +129,10 @@ def register():
         return create_response(ErrorMessage.USERNAME_TAKEN), ResponseCode.USERNAME_TAKEN
 
     user = register_user(username, password)
+
+    if user is None:
+        return create_response(ErrorMessage.INVALID_CREDENTIALS), ResponseCode.INVALID_CREDENTIALS
+
     add_user_to_database(user)
 
     response_data = {

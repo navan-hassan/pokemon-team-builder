@@ -11,10 +11,7 @@ Session = sessionmaker(bind=ENGINE)
 
 
 class DataContext:
-    engine = None
-    session_factory = None
-
-    def __init__(self, connection_string):
+    def __init__(self, connection_string: str):
         self.engine = create_engine(connection_string)
         self.session_factory = sessionmaker(self.engine)
 
@@ -28,6 +25,9 @@ def get_all_pokemon() -> list[dict]:
 def get_pokemon_by_stat(stat, value) -> list[dict]:
     with Session() as session:
         stmt = create_statement(stat, value)
+        if stmt is None:
+            return []
+
         return [stats.pokemon.as_dict(True) for stats in session.scalars(stmt).all()]
 
 
@@ -48,7 +48,7 @@ def get_pokemon_by_id(pokemon_id: int) -> list[dict]:
         return [pokemon.as_dict(recursive=True) for pokemon in session.scalars(stmt).all()]
 
 
-def create_statement(param, value) -> Select:
+def create_statement(param, value) -> Select | None:
     match param:
         case PokemonStats.HP:
             return select(Stats).filter(Stats.hp >= value).join(Pokemon)
@@ -140,8 +140,8 @@ def calculate_average_stats(team: PokemonTeam) -> None:
     stats.base_stat_total = round(stats.base_stat_total / team_size)
 
 
-def update_pokemon_team(team_id: int, slot_1: int = None, slot_2: int = None, slot_3: int = None,
-                        slot_4: int = None, slot_5: int = None, slot_6: int = None) -> dict:
+def update_pokemon_team(team_id: int, *, slot_1: int | None = None, slot_2: int | None = None, slot_3: int | None = None,
+                        slot_4: int | None = None, slot_5: int | None = None, slot_6: int | None = None) -> dict:
     with Session() as session:
         team = session.query(PokemonTeam).filter_by(id=team_id).scalar()
 
@@ -159,8 +159,8 @@ def update_pokemon_team(team_id: int, slot_1: int = None, slot_2: int = None, sl
         return team.as_dict()
 
 
-def create_pokemon_team(user_id: int = None, slot_1: int = None, slot_2: int = None, slot_3: int = None,
-                        slot_4: int = None, slot_5: int = None, slot_6: int = None) -> dict:
+def create_pokemon_team(user_id: int | None = None, *, slot_1: int | None = None, slot_2: int | None = None, slot_3: int | None = None,
+                        slot_4: int | None = None, slot_5: int | None = None, slot_6: int | None = None) -> dict:
     with Session() as session:
         new_team = PokemonTeam(
             user_id=user_id,
