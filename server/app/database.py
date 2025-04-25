@@ -6,24 +6,25 @@ from app.configuration import get_db_connection
 from app.objects import Base, Pokemon, Stats, User, PokemonTeam
 from app.util import PokemonStats, PokemonTypes
 
-ENGINE = create_engine(get_db_connection())
-Session = sessionmaker(bind=ENGINE)
-
-
 class DataContext:
     def __init__(self, connection_string: str):
         self.engine = create_engine(connection_string)
         self.session_factory = sessionmaker(self.engine)
 
+    def commit_items(self, items: list[Base]):
+        with self.session_factory() as session:
+            session.add_all(items)
+            session.commit()
+    
 
-def get_all_pokemon() -> list[dict]:
-    with Session() as session:
+def get_all_pokemon(context) -> list[dict]:
+    with context.session_factory() as session:
         stmt = select(Pokemon)
         return [pokemon.as_dict() for pokemon in session.scalars(stmt).all()]
 
 
-def get_pokemon_by_stat(stat, value) -> list[dict]:
-    with Session() as session:
+def get_pokemon_by_stat(context, stat, value) -> list[dict]:
+    with context.session_factory() as session:
         stmt = create_statement(stat, value)
         if stmt is None:
             return []
@@ -31,8 +32,8 @@ def get_pokemon_by_stat(stat, value) -> list[dict]:
         return [stats.pokemon.as_dict(True) for stats in session.scalars(stmt).all()]
 
 
-def get_pokemon_by_type(pokemon_type: str | PokemonTypes) -> list[dict]:
-    with Session() as session:
+def get_pokemon_by_type(context, pokemon_type: str | PokemonTypes) -> list[dict]:
+    with context.session_factory() as session:
         stmt = select(Pokemon).filter(
             or_(
                 Pokemon.primary_type == pokemon_type,
@@ -42,8 +43,8 @@ def get_pokemon_by_type(pokemon_type: str | PokemonTypes) -> list[dict]:
         return [pokemon.as_dict(recursive=True) for pokemon in session.scalars(stmt).all()]
 
 
-def get_pokemon_by_id(pokemon_id: int) -> list[dict]:
-    with Session() as session:
+def get_pokemon_by_id(context, pokemon_id: int) -> list[dict]:
+    with context.session_factory() as session:
         stmt = select(Pokemon).where(Pokemon.id == pokemon_id)
         return [pokemon.as_dict(recursive=True) for pokemon in session.scalars(stmt).all()]
 
@@ -66,26 +67,26 @@ def create_statement(param, value) -> Select | None:
             return select(Stats).filter(Stats.base_stat_total >= value).join(Pokemon)
 
 
-def is_username_taken(username: str) -> bool:
-    with Session() as session:
+def is_username_taken(context, username: str) -> bool:
+    with context.session_factory() as session:
         return session.query(User.username).filter_by(username=username).scalar() is not None
 
 
-def add_user_to_database(user: User) -> None:
-    with Session() as session:
+def add_user_to_database(context, user: User) -> None:
+    with context.session_factory() as session:
         session.add_all([user])
         session.commit()
 
 
-def initialize_database(connection_string) -> Engine:
+def initialize_database(context, connection_string) -> Engine:
     engine = create_engine(connection_string, echo=True)
     if not database_exists(engine.url):
         create_database(engine.url)
     return engine
 
 
-def retrieve_user_from_database(username: str) -> dict | None:
-    with Session() as session:
+def retrieve_user_from_database(context, username: str) -> dict | None:
+    with context.session_factory() as session:
         stmt = select(User).where(User.username == username)
         user = session.scalars(stmt).first()
         if user is not None:
@@ -104,8 +105,8 @@ def create_tables():
     Base.metadata.create_all(ENGINE)
 
 
-def does_team_exist(team_id: int) -> bool:
-    with Session() as session:
+def does_team_exist(context, team_id: int) -> bool:
+    with context.session_factory() as session:
         return session.query(PokemonTeam.id).filter_by(id=team_id).scalar() is not None
 
 
@@ -140,9 +141,9 @@ def calculate_average_stats(team: PokemonTeam) -> None:
     stats.base_stat_total = round(stats.base_stat_total / team_size)
 
 
-def update_pokemon_team(team_id: int, *, slot_1: int | None = None, slot_2: int | None = None, slot_3: int | None = None,
+def update_pokemon_team(context, team_id: int, *, slot_1: int | None = None, slot_2: int | None = None, slot_3: int | None = None,
                         slot_4: int | None = None, slot_5: int | None = None, slot_6: int | None = None) -> dict:
-    with Session() as session:
+    with context.session_factory() as session:
         team = session.query(PokemonTeam).filter_by(id=team_id).scalar()
 
         team.slot_1 = slot_1
@@ -159,9 +160,9 @@ def update_pokemon_team(team_id: int, *, slot_1: int | None = None, slot_2: int 
         return team.as_dict()
 
 
-def create_pokemon_team(user_id: int | None = None, *, slot_1: int | None = None, slot_2: int | None = None, slot_3: int | None = None,
+def create_pokemon_team(context, user_id: int | None = None, *, slot_1: int | None = None, slot_2: int | None = None, slot_3: int | None = None,
                         slot_4: int | None = None, slot_5: int | None = None, slot_6: int | None = None) -> dict:
-    with Session() as session:
+    with context.session_factory() as session:
         new_team = PokemonTeam(
             user_id=user_id,
             slot_1=slot_1,
@@ -193,8 +194,8 @@ def create_pokemon_team(user_id: int | None = None, *, slot_1: int | None = None
         return new_team.as_dict()
 
 
-def retrieve_teams_from_user(username: str) -> list[dict]:
-    with Session() as session:
+def retrieve_teams_from_user(context, username: str) -> list[dict]:
+    with context.session_factory() as session:
         user = session.query(User).filter(User.username == username).first()
         if user is None:
             return []

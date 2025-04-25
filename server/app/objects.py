@@ -6,6 +6,15 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from app.util import PokemonStats, PokemonTypes, Params, StrValues, Tablenames
+from typing import NamedTuple
+
+class PokemonTeamSlots(NamedTuple):
+    slot_1: int | None = None
+    slot_2: int | None = None
+    slot_3: int | None = None
+    slot_4: int | None = None
+    slot_5: int | None = None
+    slot_6: int | None = None
 
 EMPTY_SLOT = {
     StrValues.ID: -1,
@@ -256,10 +265,53 @@ class PokemonTeam(Base):
     def count(self) -> int:
         num_pokemon = 0
 
-        for slot in self.slots():
-            num_pokemon += 1 if slot is not None else 0
+        for slot in self.active_slots():
+            num_pokemon += 1
 
         return num_pokemon
 
     def slots(self) -> Iterator[int | None]:
         yield from (self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6)
+
+    def active_slots(self) -> Iterator[int]:
+        for slot in (self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6):
+            if slot is None:
+                continue
+            yield slot
+
+    def get_pokemon(self):
+        for slot in (self.pokemon_1, self.pokemon_2, self.pokemon_3, self.pokemon_4, self.pokemon_5, self.pokemon_6):
+            if slot is None:
+                continue
+            yield slot
+
+    def calculate_average_stats(self):
+        team_size = self.count()
+
+        self.avg_stats.hp = 0
+        self.avg_stats.attack = 0
+        self.avg_stats.defense = 0
+        self.avg_stats.special_attack = 0
+        self.avg_stats.special_defense = 0
+        self.avg_stats.speed = 0
+        self.avg_stats.base_stat_total = 0
+
+        for p in self.get_pokemon():
+            self.avg_stats.hp += p.stats.hp
+            self.avg_stats.attack += p.stats.attack
+            self.avg_stats.defense += p.stats.defense
+            self.avg_stats.special_attack += p.stats.special_attack
+            self.avg_stats.special_defense += p.stats.special_defense
+            self.avg_stats.speed += p.stats.speed
+            self.avg_stats.base_stat_total += p.stats.base_stat_total
+
+        stats.hp = round(stats.hp / team_size)
+        stats.attack = round(stats.attack / team_size)
+        stats.defense = round(stats.defense / team_size)
+        stats.special_attack = round(stats.special_attack / team_size)
+        stats.special_defense = round(stats.special_defense / team_size)
+        stats.speed = round(stats.speed / team_size)
+        stats.base_stat_total = round(stats.base_stat_total / team_size)
+
+
+

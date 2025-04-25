@@ -7,10 +7,10 @@ from app.util import Params
 PASSWORD_HASHER = PasswordHasher()
 
 
-def login_user(username, password_to_verify) -> dict | None:
-    if not is_username_taken(username):
+def login_user(context, username, password_to_verify) -> dict | None:
+    if not is_username_taken(context, username):
         return None
-    user = retrieve_user_from_database(username)
+    user = retrieve_user_from_database(context, username)
     if user is None:
         return None
 
@@ -19,15 +19,15 @@ def login_user(username, password_to_verify) -> dict | None:
     except VerificationError as e:
         return None
 
-    teams = retrieve_teams_from_user(user[Params.USERNAME])
+    teams = retrieve_teams_from_user(context, user[Params.USERNAME])
     return {
         Params.USERNAME: user[Params.USERNAME],
         Params.TEAMS: teams
     }
 
 
-def register_user(username, password) ->  User | None:
-    if is_username_taken(username):
+def register_user(context, username, password) ->  User | None:
+    if is_username_taken(context, username):
         return None
     hashed_password = PASSWORD_HASHER.hash(password)
     new_user = User(
