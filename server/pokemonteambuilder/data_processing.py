@@ -5,8 +5,8 @@ import sys
 import aiohttp
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-from app.configuration import get_data_processing_url, get_data_processing_json_path
-from app.objects import Base, Stats, Pokemon, Resistances
+from pokemonteambuilder.configuration import get_data_processing_url, get_data_processing_json_path
+from pokemonteambuilder.objects import PokemonTeamBuilderData, Stats, Pokemon, Resistances
 
 DATABASE_URL = get_data_processing_url()
 
@@ -18,11 +18,14 @@ async def insert_db_objects(async_session: async_sessionmaker[AsyncSession], pok
 
 
 async def populate_database(pokemon_list: list[Pokemon]):
+    if not DATABASE_URL:
+        return
+
     engine = create_async_engine(DATABASE_URL, echo=True)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(PokemonTeamBuilderData.metadata.create_all)
 
     await insert_db_objects(async_session, pokemon_list)
     await engine.dispose()

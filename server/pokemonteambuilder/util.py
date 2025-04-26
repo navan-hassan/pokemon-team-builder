@@ -7,6 +7,7 @@ class StrValues(StrEnum):
     NAME = 'name'
     PRIMARY_TYPE = 'primary_type'
     SECONDARY_TYPE = 'secondary_type'
+    AVG_STATS = 'average_stats'
     STATS = 'stats'
     RESISTANCES = 'resistances'
     USERNAME = 'username'

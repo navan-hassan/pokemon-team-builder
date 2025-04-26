@@ -1,11 +1,9 @@
-node_modules/
-myapp/node_modules/
 
-web_app/node_modules/
-.vscode/
-.yarn/
+*.db
+node_modules
+.vscode
+.yarn
 .editorconfig
 
-# Server
-server/venv/
-server/__pycache__/
+venv
+__pycache__

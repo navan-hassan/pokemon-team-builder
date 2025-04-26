@@ -1,12 +1,17 @@
 from typing import Optional
+from statistics import fmean
 from collections.abc import Iterator
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, selectinload
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from app.util import PokemonStats, PokemonTypes, Params, StrValues, Tablenames
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm.strategy_options import _AbstractLoad
+from pokemonteambuilder.util import PokemonStats, PokemonTypes, Params, StrValues, Tablenames
 from typing import NamedTuple
+from dataclasses import dataclass, asdict
+from typing import ClassVar
 
 class PokemonTeamSlots(NamedTuple):
     slot_1: int | None = None
@@ -15,6 +20,7 @@ class PokemonTeamSlots(NamedTuple):
     slot_4: int | None = None
     slot_5: int | None = None
     slot_6: int | None = None
+
 
 EMPTY_SLOT = {
     StrValues.ID: -1,
@@ -34,12 +40,20 @@ EMPTY_SLOT = {
 }
 
 
-class Base(DeclarativeBase):
+class PokemonTeamBuilderData(AsyncAttrs, DeclarativeBase):
     pass
 
+@dataclass
+class PokemonData():
+    name: str
+    sprite:str
+    primary_type: str
+    secondary_type: str | None
+    ability1: str
+    ability2: str | None
+    hidden_ability: str | None
 
-# noinspection SpellCheckingInspection
-class Pokemon(Base):
+class Pokemon(PokemonTeamBuilderData):
     __tablename__ = Tablenames.POKEMON
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
@@ -84,10 +98,17 @@ class Pokemon(Base):
             StrValues.STATS: self.stats.as_dict(),
             StrValues.RESISTANCES: self.resistances.as_dict()
         }
+    
+    def serialize(self):
+        pass
+
+    @staticmethod
+    def select_loadable_attributes():
+        yield from (selectinload(Pokemon.resistances), selectinload(Pokemon.stats))
 
 
-# noinspection SpellCheckingInspection
-class Resistances(Base):
+
+class Resistances(PokemonTeamBuilderData):
     __tablename__ = Tablenames.RESISTANCES
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     pokemon_id: Mapped[int] = mapped_column(ForeignKey("pokemon.id"))
@@ -156,8 +177,8 @@ class Resistances(Base):
         }
 
 
-# noinspection SpellCheckingInspection
-class Stats(Base):
+
+class Stats(PokemonTeamBuilderData):
     __tablename__ = Tablenames.STATS
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     pokemon_id: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
@@ -191,9 +212,38 @@ class Stats(Base):
             PokemonStats.SPEED: self.speed,
             PokemonStats.BASE_STAT_TOTAL: self.base_stat_total
         }
+    
+    @staticmethod
+    def get_attribute(value: PokemonStats):
+        string_mappings = {
+            PokemonStats.HP: Stats.hp,
+            PokemonStats.ATTACK: Stats.attack,
+            PokemonStats.DEFENSE: Stats.defense,
+            PokemonStats.SPECIAL_ATTACK: Stats.special_attack,
+            PokemonStats.SPECIAL_DEFENSE: Stats.special_defense,
+            PokemonStats.SPEED: Stats.speed,
+            PokemonStats.BASE_STAT_TOTAL: Stats.base_stat_total
+        }
+        return string_mappings[value]
+    
+    @staticmethod
+    def select_loadable_attributes():
+        yield from (selectinload(Stats.pokemon).selectinload(Pokemon.resistances),
+                selectinload(Stats.pokemon).selectinload(Pokemon.stats))
+        
+    @classmethod
+    def create_empty(cls):
+        return cls(
+            hp=0,
+            attack=0,
+            defense=0,
+            special_attack=0,
+            special_defense=0,
+            speed=0,
+            base_stat_total=0
+            )
 
-
-class User(Base):
+class User(PokemonTeamBuilderData):
     __tablename__ = Tablenames.USERS
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column()
@@ -208,25 +258,54 @@ class User(Base):
         }
 
 
-class PokemonTeam(Base):
+class PokemonTeam(PokemonTeamBuilderData):
     __tablename__ = Tablenames.TEAMS
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     slot_1: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
-    pokemon_1: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_1])
+    pokemon_1: Mapped[Pokemon | None] = relationship(foreign_keys=[slot_1])
     slot_2: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
-    pokemon_2: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_2])
+    pokemon_2: Mapped[Pokemon | None] = relationship(foreign_keys=[slot_2])
     slot_3: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
-    pokemon_3: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_3])
+    pokemon_3: Mapped[Pokemon | None] = relationship(foreign_keys=[slot_3])
     slot_4: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
-    pokemon_4: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_4])
+    pokemon_4: Mapped[Pokemon | None] = relationship(foreign_keys=[slot_4])
     slot_5: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
-    pokemon_5: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_5])
+    pokemon_5: Mapped[Pokemon | None] = relationship(foreign_keys=[slot_5])
     slot_6: Mapped[int | None] = mapped_column(ForeignKey("pokemon.id"))
-    pokemon_6: Mapped[Optional["Pokemon"]] = relationship(foreign_keys=[slot_6])
+    pokemon_6: Mapped[Pokemon | None] = relationship(foreign_keys=[slot_6])
     avg_stats_id: Mapped[int | None] = mapped_column(ForeignKey("stats.id"))
     avg_stats: Mapped["Stats"] = relationship(foreign_keys=[avg_stats_id])
     user_id: Mapped[int | None] = mapped_column((ForeignKey("users.id")))
-    user: Mapped[Optional["User"]] = relationship(foreign_keys=[user_id], back_populates=Tablenames.TEAMS)
+    user: Mapped[User | None] = relationship(foreign_keys=[user_id], back_populates=Tablenames.TEAMS)
+
+    @staticmethod
+    def select_loadable_attributes():
+        slots = frozenset({
+            PokemonTeam.pokemon_1, 
+            PokemonTeam.pokemon_2, 
+            PokemonTeam.pokemon_3, 
+            PokemonTeam.pokemon_4, 
+            PokemonTeam.pokemon_5, 
+            PokemonTeam.pokemon_6
+            })
+        yield from (
+            *(selectinload(p).selectinload(Pokemon.stats) for p in slots),
+            *(selectinload(p).selectinload(Pokemon.resistances) for p in slots),
+            selectinload(PokemonTeam.avg_stats),
+            selectinload(PokemonTeam.user)
+        )
+
+    @classmethod
+    def create(cls, slots: PokemonTeamSlots, *, user_id = None):
+        return cls(
+                user_id=user_id,
+                slot_1=slots.slot_1,
+                slot_2=slots.slot_2,
+                slot_3=slots.slot_3,
+                slot_4=slots.slot_4,
+                slot_5=slots.slot_5,
+                slot_6=slots.slot_6
+            )
 
     def __repr__(self) -> str:
         return f'''PokemonTeam(
@@ -238,7 +317,7 @@ class PokemonTeam(Base):
         {StrValues.SLOT_4}={self.pokemon_4.name if self.pokemon_4 is not None else StrValues.NONE!r},
         {StrValues.SLOT_5}={self.pokemon_5.name if self.pokemon_5 is not None else StrValues.NONE!r},
         {StrValues.SLOT_6}={self.pokemon_6.name if self.pokemon_6 is not None else StrValues.NONE!r},
-        {StrValues.STATS}={self.avg_stats if self.avg_stats is not None else StrValues.NONE!r},
+        {StrValues.AVG_STATS}={self.avg_stats if self.avg_stats is not None else StrValues.NONE!r},
     )'''
 
     def as_dict(self):
@@ -251,7 +330,7 @@ class PokemonTeam(Base):
             StrValues.SLOT_4: self.pokemon_4.as_dict(recursive=True) if self.pokemon_4 is not None else EMPTY_SLOT,
             StrValues.SLOT_5: self.pokemon_5.as_dict(recursive=True) if self.pokemon_5 is not None else EMPTY_SLOT,
             StrValues.SLOT_6: self.pokemon_6.as_dict(recursive=True) if self.pokemon_6 is not None else EMPTY_SLOT,
-            StrValues.STATS: self.avg_stats.as_dict() if self.avg_stats is not None else {
+            StrValues.AVG_STATS: self.avg_stats.as_dict() if self.avg_stats is not None else {
                 PokemonStats.HP: 0,
                 PokemonStats.ATTACK: 0,
                 PokemonStats.DEFENSE: 0,
@@ -270,8 +349,6 @@ class PokemonTeam(Base):
 
         return num_pokemon
 
-    def slots(self) -> Iterator[int | None]:
-        yield from (self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6)
 
     def active_slots(self) -> Iterator[int]:
         for slot in (self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6):
@@ -285,33 +362,31 @@ class PokemonTeam(Base):
                 continue
             yield slot
 
+    def update_slots(self, *, new_slots: PokemonTeamSlots):
+        self.slot_1 = new_slots.slot_1
+        self.slot_2 = new_slots.slot_2
+        self.slot_3 = new_slots.slot_3
+        self.slot_4 = new_slots.slot_4
+        self.slot_5 = new_slots.slot_5
+        self.slot_6 = new_slots.slot_6
+        self.calculate_average_stats()
+
     def calculate_average_stats(self):
-        team_size = self.count()
-
-        self.avg_stats.hp = 0
-        self.avg_stats.attack = 0
-        self.avg_stats.defense = 0
-        self.avg_stats.special_attack = 0
-        self.avg_stats.special_defense = 0
-        self.avg_stats.speed = 0
-        self.avg_stats.base_stat_total = 0
-
-        for p in self.get_pokemon():
-            self.avg_stats.hp += p.stats.hp
-            self.avg_stats.attack += p.stats.attack
-            self.avg_stats.defense += p.stats.defense
-            self.avg_stats.special_attack += p.stats.special_attack
-            self.avg_stats.special_defense += p.stats.special_defense
-            self.avg_stats.speed += p.stats.speed
-            self.avg_stats.base_stat_total += p.stats.base_stat_total
-
-        stats.hp = round(stats.hp / team_size)
-        stats.attack = round(stats.attack / team_size)
-        stats.defense = round(stats.defense / team_size)
-        stats.special_attack = round(stats.special_attack / team_size)
-        stats.special_defense = round(stats.special_defense / team_size)
-        stats.speed = round(stats.speed / team_size)
-        stats.base_stat_total = round(stats.base_stat_total / team_size)
+        
+        aggregate_hp = {p.stats.hp for p in self.get_pokemon() if p.id > -1}
+        aggregate_attack = {p.stats.attack for p in self.get_pokemon() if p.id > -1}
+        aggregate_defense = {p.stats.defense for p in self.get_pokemon() if p.id > -1}
+        aggregate_sp_attack = {p.stats.special_attack for p in self.get_pokemon() if p.id > -1}
+        aggregate_sp_defense = {p.stats.special_defense for p in self.get_pokemon() if p.id > -1}
+        aggregate_speed = {p.stats.speed for p in self.get_pokemon() if p.id > -1}
+        aggregate_bst = {p.stats.base_stat_total for p in self.get_pokemon() if p.id > -1}
+        self.avg_stats.hp = round(fmean(aggregate_hp))
+        self.avg_stats.attack = round(fmean(aggregate_attack))
+        self.avg_stats.defense = round(fmean(aggregate_defense))
+        self.avg_stats.special_attack = round(fmean(aggregate_sp_attack))
+        self.avg_stats.special_defense = round(fmean(aggregate_sp_defense))
+        self.avg_stats.speed = round(fmean(aggregate_speed))
+        self.avg_stats.base_stat_total = round(fmean(aggregate_bst))
 
 
 
