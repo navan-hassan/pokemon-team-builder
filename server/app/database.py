@@ -29,7 +29,7 @@ def get_pokemon_by_stat(context, stat, value) -> list[dict]:
         if stmt is None:
             return []
 
-        return [stats.pokemon.as_dict(True) for stats in session.scalars(stmt).all()]
+        return [stats.pokemon.as_dict(recursive=True) for stats in session.scalars(stmt).all()]
 
 
 def get_pokemon_by_type(context, pokemon_type: str | PokemonTypes) -> list[dict]:
@@ -201,3 +201,11 @@ def retrieve_teams_from_user(context, username: str) -> list[dict]:
             return []
 
         return [team.as_dict() for team in user.teams]
+    
+def retrieve_team_by_id(context, id: int) -> list[dict]:
+    with context.session_factory() as session:
+        result = session.query(PokemonTeam).filter(PokemonTeam.id == id).first()
+        if result is None:
+            return []
+
+        return result.as_dict()
