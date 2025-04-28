@@ -1,4 +1,3 @@
-from typing import Optional
 from statistics import fmean
 from collections.abc import Iterator
 from sqlalchemy import ForeignKey
@@ -7,11 +6,8 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm.strategy_options import _AbstractLoad
 from pokemonteambuilder.util import PokemonStats, PokemonTypes, Params, StrValues, Tablenames
 from typing import NamedTuple
-from dataclasses import dataclass, asdict
-from typing import ClassVar
 
 class PokemonTeamSlots(NamedTuple):
     slot_1: int | None = None
@@ -42,16 +38,6 @@ EMPTY_SLOT = {
 
 class PokemonTeamBuilderData(AsyncAttrs, DeclarativeBase):
     pass
-
-@dataclass
-class PokemonData():
-    name: str
-    sprite:str
-    primary_type: str
-    secondary_type: str | None
-    ability1: str
-    ability2: str | None
-    hidden_ability: str | None
 
 class Pokemon(PokemonTeamBuilderData):
     __tablename__ = Tablenames.POKEMON
