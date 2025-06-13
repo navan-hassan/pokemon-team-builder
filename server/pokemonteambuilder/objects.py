@@ -66,8 +66,6 @@ class Pokemon(PokemonTeamBuilderData):
     def select_loadable_attributes():
         yield from (selectinload(Pokemon.resistances), selectinload(Pokemon.stats))
 
-
-
 class Resistances(PokemonTeamBuilderData):
     __tablename__ = Tablenames.RESISTANCES
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -135,8 +133,6 @@ class Resistances(PokemonTeamBuilderData):
             PokemonTypes.DARK: self.dark,
             PokemonTypes.FAIRY: self.fairy
         }
-
-
 
 class Stats(PokemonTeamBuilderData):
     __tablename__ = Tablenames.STATS
@@ -283,7 +279,6 @@ class PokemonTeam(PokemonTeamBuilderData):
 
     @classmethod
     def create(cls, slots: PokemonTeamSlots, *, user_id = None):
-
         return cls(
                 user_id=user_id,
                 slot_1=slots.slot_1,
@@ -321,24 +316,15 @@ class PokemonTeam(PokemonTeamBuilderData):
         }
 
     def count(self) -> int:
-        num_pokemon = 0
-
-        for slot in self.active_slots():
-            num_pokemon += 1
-
-        return num_pokemon
+        return sum(1 for _ in self.get_pokemon())
 
     def active_slots(self) -> Iterator[int]:
-        for slot in (self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6):
-            if slot is None:
-                continue
-            yield slot
+        slots = frozenset({self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6})
+        yield from (slot for slot in slots if slot is not None and slot > 0)
 
-    def get_pokemon(self):
-        for slot in (self.pokemon_1, self.pokemon_2, self.pokemon_3, self.pokemon_4, self.pokemon_5, self.pokemon_6):
-            if slot is None:
-                continue
-            yield slot
+    def get_pokemon(self) -> Iterator[Pokemon]:
+        slots = frozenset({self.pokemon_1, self.pokemon_2, self.pokemon_3, self.pokemon_4, self.pokemon_5, self.pokemon_6})
+        yield from (slot for slot in slots if slot is not None)
 
     def update_slots(self, *, new_slots: PokemonTeamSlots):
         self.slot_1 = new_slots.slot_1
@@ -350,8 +336,6 @@ class PokemonTeam(PokemonTeamBuilderData):
         self.calculate_average_stats()
 
     def calculate_average_stats(self):
-        print(str(self))
-        
         aggregate_hp = {p.stats.hp for p in self.get_pokemon() if p.id > -1}
         aggregate_attack = {p.stats.attack for p in self.get_pokemon() if p.id > -1}
         aggregate_defense = {p.stats.defense for p in self.get_pokemon() if p.id > -1}
