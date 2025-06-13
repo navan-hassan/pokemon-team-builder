@@ -81,14 +81,14 @@ export const pokemonTeamSlice = createSlice({
         .addCase(createTeam.fulfilled, (state, action) => {
             state.loading = 'success';
             state.team = [
-                action.payload.team.Slot_1,
-                action.payload.team.Slot_2,
-                action.payload.team.Slot_3,
-                action.payload.team.Slot_4,
-                action.payload.team.Slot_5,
-                action.payload.team.Slot_6
+                action.payload.team.slot_1,
+                action.payload.team.slot_2,
+                action.payload.team.slot_3,
+                action.payload.team.slot_4,
+                action.payload.team.slot_5,
+                action.payload.team.slot_6
             ];
-            state.stats = action.payload.team.stats;
+            state.stats = action.payload.team.average_stats;
         })
     }
 })

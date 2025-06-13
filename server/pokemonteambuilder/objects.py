@@ -7,33 +7,13 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from pokemonteambuilder.util import PokemonStats, PokemonTypes, Params, StrValues, Tablenames
+from pokemonteambuilder.api import PokemonTeamSlots
 from typing import NamedTuple
 
-class PokemonTeamSlots(NamedTuple):
-    slot_1: int | None = None
-    slot_2: int | None = None
-    slot_3: int | None = None
-    slot_4: int | None = None
-    slot_5: int | None = None
-    slot_6: int | None = None
 
 
-EMPTY_SLOT = {
-    StrValues.ID: -1,
-    StrValues.NAME: StrValues.NONE,
-    StrValues.PRIMARY_TYPE: StrValues.NONE,
-    StrValues.SECONDARY_TYPE: StrValues.NONE,
-    StrValues.STATS: {
-        PokemonStats.HP: 0,
-        PokemonStats.ATTACK: 0,
-        PokemonStats.DEFENSE: 0,
-        PokemonStats.SPECIAL_ATTACK: 0,
-        PokemonStats.SPECIAL_DEFENSE: 0,
-        PokemonStats.SPEED: 0,
-        PokemonStats.BASE_STAT_TOTAL: 0
-    },
-    StrValues.RESISTANCES: None
-}
+
+
 
 
 class PokemonTeamBuilderData(AsyncAttrs, DeclarativeBase):
@@ -244,6 +224,34 @@ class User(PokemonTeamBuilderData):
         }
 
 
+
+EMPTY_SLOT = {
+    StrValues.ID: -1,
+    StrValues.NAME: StrValues.NONE,
+    StrValues.PRIMARY_TYPE: StrValues.NONE,
+    StrValues.SECONDARY_TYPE: StrValues.NONE,
+    StrValues.STATS: {
+        PokemonStats.HP: 0,
+        PokemonStats.ATTACK: 0,
+        PokemonStats.DEFENSE: 0,
+        PokemonStats.SPECIAL_ATTACK: 0,
+        PokemonStats.SPECIAL_DEFENSE: 0,
+        PokemonStats.SPEED: 0,
+        PokemonStats.BASE_STAT_TOTAL: 0
+    },
+    StrValues.RESISTANCES: None
+}
+
+EMPTY_STATS = {
+    PokemonStats.HP: 0,
+    PokemonStats.ATTACK: 0,
+    PokemonStats.DEFENSE: 0,
+    PokemonStats.SPECIAL_ATTACK: 0,
+    PokemonStats.SPECIAL_DEFENSE: 0,
+    PokemonStats.SPEED: 0,
+    PokemonStats.BASE_STAT_TOTAL: 0
+}
+
 class PokemonTeam(PokemonTeamBuilderData):
     __tablename__ = Tablenames.TEAMS
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -283,6 +291,7 @@ class PokemonTeam(PokemonTeamBuilderData):
 
     @classmethod
     def create(cls, slots: PokemonTeamSlots, *, user_id = None):
+
         return cls(
                 user_id=user_id,
                 slot_1=slots.slot_1,
@@ -316,15 +325,7 @@ class PokemonTeam(PokemonTeamBuilderData):
             StrValues.SLOT_4: self.pokemon_4.as_dict(recursive=True) if self.pokemon_4 is not None else EMPTY_SLOT,
             StrValues.SLOT_5: self.pokemon_5.as_dict(recursive=True) if self.pokemon_5 is not None else EMPTY_SLOT,
             StrValues.SLOT_6: self.pokemon_6.as_dict(recursive=True) if self.pokemon_6 is not None else EMPTY_SLOT,
-            StrValues.AVG_STATS: self.avg_stats.as_dict() if self.avg_stats is not None else {
-                PokemonStats.HP: 0,
-                PokemonStats.ATTACK: 0,
-                PokemonStats.DEFENSE: 0,
-                PokemonStats.SPECIAL_ATTACK: 0,
-                PokemonStats.SPECIAL_DEFENSE: 0,
-                PokemonStats.SPEED: 0,
-                PokemonStats.BASE_STAT_TOTAL: 0
-            }
+            StrValues.AVG_STATS: self.avg_stats.as_dict() if self.avg_stats is not None else EMPTY_STATS
         }
 
     def count(self) -> int:
@@ -358,6 +359,7 @@ class PokemonTeam(PokemonTeamBuilderData):
         self.calculate_average_stats()
 
     def calculate_average_stats(self):
+        print(str(self))
         
         aggregate_hp = {p.stats.hp for p in self.get_pokemon() if p.id > -1}
         aggregate_attack = {p.stats.attack for p in self.get_pokemon() if p.id > -1}

@@ -64,7 +64,7 @@ const PokemonSelector = ({pokemonList, pokemonTeam, pokemonTeamId, createPokemon
                     disablePortal
                     value={pokemon}
                     id="combo-box-demo"
-                    options={pokemonList}
+                    options={pokemonList ? pokemonList : []}
                     sx={{ width: 300 }}
                     getOptionLabel={option => option.name}
                     onChange={(event: any, newValue: pokemon | null) => {

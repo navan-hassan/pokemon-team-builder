@@ -1,8 +1,11 @@
+from statistics import fmean
 from sqlalchemy import select, or_
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.orm import selectinload
 
-from pokemonteambuilder.objects import Pokemon, PokemonTeamSlots, Stats, User, PokemonTeam
+from pokemonteambuilder.objects import Pokemon, Stats, User, PokemonTeam, PokemonTeamBuilderData
 from pokemonteambuilder.util import PokemonTypes
+from pokemonteambuilder.api import PokemonTeamSlots
 
 async def get_all_pokemon(session_factory: async_sessionmaker) -> list[dict]:
     pokemon_list = []
@@ -98,13 +101,56 @@ async def update_pokemon_team(team_id: int, session_factory: async_sessionmaker,
 
         return team.as_dict()
 
-    
-async def create_pokemon_team(self, session_factory: async_sessionmaker, *, slots: PokemonTeamSlots, user_id: int | None = None) -> dict:
-    new_team = PokemonTeam.create(slots, user_id=user_id)
+
+async def create_average_stats(session_factory: async_sessionmaker, *, slots: PokemonTeamSlots) -> Stats:
+    aggregate_hp = []
+    aggregate_attack = []
+    aggregate_defense = []
+    aggregate_sp_attack = []
+    aggregate_sp_defense = []
+    aggregate_speed = []
+    aggregate_bst = []
+
+    conditions = (Pokemon.id == id for id in slots.active())
+    stmt = select(Pokemon).where(or_(*conditions)).options(selectinload(Pokemon.stats))
     avg_stats = Stats.create_empty()
     async with session_factory() as session, session.begin():
-        await session.add_all([avg_stats, new_team])
-        new_team.avg_stats_id = avg_stats.id
-        new_team.calculate_average_stats()
+        result = await session.execute(stmt)
+        for pokemon in result.scalars().all():
+            aggregate_hp.append(pokemon.stats.hp)
+            aggregate_attack.append(pokemon.stats.attack)
+            aggregate_defense.append(pokemon.stats.defense)
+            aggregate_sp_attack.append(pokemon.stats.special_attack)
+            aggregate_sp_defense.append(pokemon.stats.special_defense)
+            aggregate_speed.append(pokemon.stats.speed)
+            aggregate_bst.append(pokemon.stats.base_stat_total)
+        
+        avg_stats.hp = round(fmean(aggregate_hp))
+        avg_stats.attack = round(fmean(aggregate_attack))
+        avg_stats.defense = round(fmean(aggregate_defense))
+        avg_stats.special_attack = round(fmean(aggregate_sp_attack))
+        avg_stats.special_defense = round(fmean(aggregate_sp_defense))
+        avg_stats.speed = round(fmean(aggregate_speed))
+        avg_stats.base_stat_total = round(fmean(aggregate_bst))
+    return avg_stats
+
+
+async def create_pokemon_team(session_factory: async_sessionmaker, *, slots: PokemonTeamSlots, user_id: int | None = None) -> dict:
+    new_team = PokemonTeam.create(slots, user_id=user_id)
+    new_team.avg_stats = await create_average_stats(session_factory=session_factory, slots=slots)
+    async with session_factory() as session, session.begin():
+        session.add_all([new_team])
         await session.commit()
-    return new_team.as_dict()
+        team_dict = await get_team_by_id(session_factory=session_factory, team_id=new_team.id)
+        return team_dict
+
+
+async def get_team_by_id(session_factory: async_sessionmaker, team_id: int) -> dict:
+    stmt = select(PokemonTeam).filter(PokemonTeam.id == team_id).options(*PokemonTeam.select_loadable_attributes())
+
+    async with session_factory() as session, session.begin():
+        result = await session.execute(stmt)
+        if not (team:= result.scalars().first()):
+            return {}
+
+        return team.as_dict()

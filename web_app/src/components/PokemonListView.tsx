@@ -26,7 +26,7 @@ type Props = ConnectedProps<typeof connector>;
 
 const PokemonListView = ({pokemonList, fetchAllPokemon, fetchPokemonByID}: Props) => {
     
-    //console.log(pokemonList);
+    console.log(pokemonList);
     const handleClick = (id: number) => {
         fetchPokemonByID(id)
     }
