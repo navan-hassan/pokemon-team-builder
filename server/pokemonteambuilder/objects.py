@@ -10,12 +10,6 @@ from pokemonteambuilder.util import PokemonStats, PokemonTypes, Params, StrValue
 from pokemonteambuilder.api import PokemonTeamSlots
 from typing import NamedTuple
 
-
-
-
-
-
-
 class PokemonTeamBuilderData(AsyncAttrs, DeclarativeBase):
     pass
 
@@ -223,8 +217,6 @@ class User(PokemonTeamBuilderData):
             Params.ID: self.id
         }
 
-
-
 EMPTY_SLOT = {
     StrValues.ID: -1,
     StrValues.NAME: StrValues.NONE,
@@ -335,7 +327,6 @@ class PokemonTeam(PokemonTeamBuilderData):
             num_pokemon += 1
 
         return num_pokemon
-
 
     def active_slots(self) -> Iterator[int]:
         for slot in (self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6):

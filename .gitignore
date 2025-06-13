@@ -5,5 +5,7 @@ node_modules
 .yarn
 .editorconfig
 
+*.env
+
 venv
 __pycache__
