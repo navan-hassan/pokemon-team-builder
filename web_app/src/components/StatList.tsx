@@ -8,6 +8,9 @@ interface Props {
 
 
 const StatList = ({stats}: Props) => {
+
+    const convertToWidth = (value: number) => ((value/255)*100+30).toFixed(0);
+
     return (
         <List sx={{
             width: '100%',
@@ -16,7 +19,7 @@ const StatList = ({stats}: Props) => {
             position: 'relative',
             padding: 0
             }}>
-                <ListItem sx= {{bgcolor:'#f6685e', width: `${((stats.hp/255)*100+30).toFixed(0)}%`}} component="div"  divider>
+                <ListItem sx= {{bgcolor:'#f6685e', width: `${convertToWidth(stats.hp)}%`}} component="div"  divider>
                 <ListItemText
                     primary={`HP: ${stats.hp.toFixed(0)}`}
                     primaryTypographyProps={{
@@ -25,7 +28,7 @@ const StatList = ({stats}: Props) => {
                         variant: "body2",
                     }}/>
             </ListItem>
-            <ListItem sx= {{bgcolor:'#ffac33', width: `${((stats.attack/255)*100+30).toFixed(0)}%`}} component="div"  divider>
+            <ListItem sx= {{bgcolor:'#ffac33', width: `${convertToWidth(stats.attack)}%`}} component="div"  divider>
                 <ListItemText
                     primary={`ATTACK: ${stats.attack.toFixed(0)}`}
                     primaryTypographyProps={{
@@ -34,7 +37,7 @@ const StatList = ({stats}: Props) => {
                         variant: "body2",
                     }}/>
             </ListItem>
-            <ListItem sx= {{bgcolor:'#ffef62', width: `${((stats.defense/255)*100+30).toFixed(0)}%`}} component="div"  divider>
+            <ListItem sx= {{bgcolor:'#ffef62', width: `${convertToWidth(stats.defense)}%`}} component="div"  divider>
                 <ListItemText
                     primary={`DEFENSE: ${stats.defense.toFixed(0)}`}
                     primaryTypographyProps={{
@@ -43,7 +46,7 @@ const StatList = ({stats}: Props) => {
                         variant: "body2",
                     }}/>
             </ListItem>
-            <ListItem sx= {{bgcolor:'#33c9dc', width: `${((stats.special_attack/255)*100+30).toFixed(0)}%`}} component="div"  divider>
+            <ListItem sx= {{bgcolor:'#33c9dc', width: `${convertToWidth(stats.special_attack)}%`}} component="div"  divider>
                 <ListItemText
                     primary={`SP. ATTACK: ${stats.special_attack.toFixed(0)}`}
                     primaryTypographyProps={{
@@ -52,7 +55,7 @@ const StatList = ({stats}: Props) => {
                         variant: "body2",
                     }}/>
             </ListItem>
-            <ListItem sx= {{bgcolor:'#6fbf73', width: `${((stats.special_defense/255)*100+30).toFixed(0)}%`}} component="div"  divider>
+            <ListItem sx= {{bgcolor:'#6fbf73', width: `${convertToWidth(stats.special_defense)}%`}} component="div"  divider>
                 <ListItemText
                     primary={`SP. DEFENSE: ${stats.special_defense.toFixed(0)}`}
                     primaryTypographyProps={{
@@ -61,7 +64,7 @@ const StatList = ({stats}: Props) => {
                         variant: "body2",
                     }}/>
             </ListItem>
-            <ListItem sx= {{bgcolor:'#ed4b82', width: `${((stats.speed/255)*100+30).toFixed(0)}%`}} component="div"  divider>
+            <ListItem sx= {{bgcolor:'#ed4b82', width: `${convertToWidth(stats.speed)}%`}} component="div"  divider>
                 <ListItemText
                     primary={`SPEED: ${stats.speed.toFixed(0)}`}
                     primaryTypographyProps={{

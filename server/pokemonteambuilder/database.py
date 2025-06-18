@@ -7,11 +7,13 @@ from pokemonteambuilder.objects import Pokemon, Stats, User, PokemonTeam
 from pokemonteambuilder.util import PokemonTypes
 from pokemonteambuilder.api import PokemonTeamSlots
 
+
 async def get_all_pokemon(session_factory: async_sessionmaker) -> list[dict]:
     stmt = select(Pokemon).options(*Pokemon.select_loadable_attributes())
     async with session_factory() as session, session.begin():
         result = await session.execute(stmt)
         return [pokemon.as_dict() for pokemon in result.scalars().all()]
+
 
 async def get_pokemon_by_stat(stat, value, session_factory: async_sessionmaker) -> list[dict]:
     condition = Stats.get_attribute(stat) >= value
@@ -19,6 +21,7 @@ async def get_pokemon_by_stat(stat, value, session_factory: async_sessionmaker) 
     async with session_factory() as session, session.begin():
         result = await session.execute(stmt)
         return [stats.pokemon.as_dict(recursive=True) for stats in result.scalars().all()]
+
 
 async def get_pokemon_by_type(*args: str | PokemonTypes, session_factory: async_sessionmaker) -> list[dict]:
     conditions = (
@@ -57,7 +60,7 @@ async def is_username_taken(username: str, session_factory: async_sessionmaker) 
         result = await session.execute(stmt)
         return result.scalar() is not None
 
-    
+
 async def retrieve_user_from_database(username: str, session_factory: async_sessionmaker) -> dict | None:
     stmt = select(User).where(User.username == username)
     async with session_factory() as session, session.begin():
@@ -65,9 +68,11 @@ async def retrieve_user_from_database(username: str, session_factory: async_sess
         if user := result.scalars().first():
             return user.as_dict()
         return None
-    
+
+   
 async def retrieve_teams_from_user(self,  username: str):
     pass # TODO: implement method using async sqlalchemy
+
 
 async def update_pokemon_team(team_id: int, session_factory: async_sessionmaker, *, new_team: PokemonTeamSlots) -> dict:
     condition = (PokemonTeam.id == team_id)
@@ -137,4 +142,5 @@ async def get_team_by_id(session_factory: async_sessionmaker, team_id: int) -> d
         if not (team:= result.scalars().first()):
             return {}
 
+        print(team.count())
         return team.as_dict()

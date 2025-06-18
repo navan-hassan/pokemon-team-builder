@@ -12,7 +12,6 @@ export const createTeam = createAsyncThunk(
     }
 )
 
-
 interface PokemonTeamState {
     team_id: number
     team: pokemon[]

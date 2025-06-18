@@ -13,8 +13,6 @@ class PokemonTeamSlots(BaseModel):
 
     def iter_slots(self) -> Iterator[int]:
         slots = frozenset({self.slot_1, self.slot_2, self.slot_3, self.slot_4, self.slot_5, self.slot_6})
-        for slot in slots:
-            if slot is None:
-                continue
-            yield slot
+        yield from (s for s in slots if s is not None)
+
             

@@ -50,9 +50,7 @@ const Homescreen = ({pokemonTeamStats}: Props) => {
                                             <Divider />
                                         <StatList stats={pokemonTeamStats ? pokemonTeamStats : emptyStats}/>
                                         </Paper>
-
                             </Grid>
-
                             <Grid item xs={6}>
                             <Box sx={{alignItems: "stretch", flexGrow: 1, width: '100%', height: '100%'}}>
                                     <ResistanceTable/>
