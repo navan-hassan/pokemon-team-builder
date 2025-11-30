@@ -9,12 +9,11 @@ import {
     Paper,
     Avatar
  } from "@mui/material";
-import { typeList, colors} from "../resources";
+import { typeList, colors, emptySprite} from "../resources";
 import { connect, ConnectedProps } from "react-redux";
 import { RootState } from "../redux";
 import { pokemon } from "../interfaces";
 
-const emptySprite = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png"
 const mapStateToProps = (state: RootState) => {
     return {
         pokemonTeam: state.PokemonTeam.team

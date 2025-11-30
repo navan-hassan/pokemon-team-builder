@@ -5,8 +5,9 @@ import { createTeam } from "../redux/PokemonTeamReducer";
 import { connect, ConnectedProps } from 'react-redux'
 import { pokemon } from "../interfaces";
 import StatList from "./StatList";
+import { emptySprite } from "../resources";
 
-const emptySprite = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png"
+
 const mapStateToProps = (state: RootState) => {
     return {
         pokemonList: state.PokemonList.pokemonList,

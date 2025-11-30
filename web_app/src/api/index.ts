@@ -1,9 +1,10 @@
 import axios from 'axios';
+
+import config from '../resources/config.json'
 import { pokemon,pokemon_team } from '../interfaces';
-//const axios = require('axios');
 
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:5000/',
+    baseURL: config.apiUrl,
 })
 
 export const getPokemonById = (id: number) => api.get(`/pokemon/id?id=${id}`)
