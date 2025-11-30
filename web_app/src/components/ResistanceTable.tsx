@@ -9,7 +9,7 @@ import {
     Paper,
     Avatar
  } from "@mui/material";
-import { typeList, colors, emptySprite} from "../resources";
+import { pokemonTypeList, asTitle, emptySprite, PokemonType} from "../resources";
 import { connect, ConnectedProps } from "react-redux";
 import { RootState } from "../redux";
 import { pokemon } from "../interfaces";
@@ -51,14 +51,14 @@ const ResistanceTable = ({pokemonTeam}:Props) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {typeList.map((val: string) => 
-                        <TableRow key={val}>
+                    {pokemonTypeList.map((pokemonType: PokemonType) => 
+                        <TableRow key={pokemonType.text}>
                             <TableCell align='left'>
                                 <Typography
                                     variant="body2"
-                                    color={colors[val]}
+                                    color={pokemonType.color}
                                     fontWeight= 'medium'>
-                                        {val}
+                                        {asTitle(pokemonType.text)}
                                 </Typography>
                             </TableCell>
                             {
@@ -66,10 +66,10 @@ const ResistanceTable = ({pokemonTeam}:Props) => {
                                 <TableCell align='left' >
                                 <Typography
                                     variant="body2"
-                                    color={colors[val]}
+                                    color={pokemonType.color}
                                     fontWeight="bold">
                                         {pokemon && pokemon.resistances != null && !isEmpty(pokemon)
-                                        ? pokemon.resistances[val] : ""}
+                                        ? pokemon.resistances[pokemonType.text] : ""}
                                 </Typography>
                             </TableCell>)
                             }

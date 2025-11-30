@@ -1,68 +1,35 @@
 
-import typeColors from './colors.json'
+import { types } from './types.json';
 
-export const typeList:string[] = [
-    "normal",
-    "fire",
-    "water",
-    "grass",
-    "flying",
-    "fighting",
-    "poison",
-    "electric",
-    "ground",
-    "rock",
-    "psychic",
-    "ice",
-    "bug",
-    "ghost",
-    "steel",
-    "dragon",
-    "dark", 
-    "fairy"
-]
-
-export interface colorList {
-    [key: string]:string
-}
-
-export const colors:colorList = {
-	'normal': typeColors.normal,
-	'fire': typeColors.fire,
-	'water': typeColors.water,
-	'electric': typeColors.electric,
-	'grass': typeColors.grass,
-	'ice': typeColors.ice,
-	'fighting': typeColors.fighting,
-	'poison': typeColors.poison,
-	'ground': typeColors.ground,
-	'flying': typeColors.flying,
-	'psychic': typeColors.psychic,
-	'bug': typeColors.bug,
-	'rock': typeColors.rock,
-	'ghost': typeColors.ghost,
-	'dragon': typeColors.dragon,
-	'dark': typeColors.dark,
-	'steel': typeColors.steel,
-	'fairy': typeColors.fairy,
-    "Normal": typeColors.normal,
-	"Fire": typeColors.fire,
-	"Water": typeColors.water,
-	"Electric": typeColors.electric,
-	"Grass": typeColors.grass,
-	"Ice": typeColors.ice,
-	"Fighting": typeColors.fighting,
-	"Poison": typeColors.poison,
-	"Ground": typeColors.ground,
-	"Flying": typeColors.flying,
-	"Psychic": typeColors.psychic,
-	"Bug": typeColors.bug,
-	"Rock": typeColors.rock,
-	"Ghost": typeColors.ghost,
-	"Dragon": typeColors.dragon,
-	"Dark": typeColors.dark,
-	"Steel": typeColors.steel,
-	"Fairy": typeColors.fairy,
+export type PokemonType = {
+	text: string;
+	color: string;
 };
 
-export const emptySprite:string = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'
+export const asTitle = (str: string): string  => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const pokemonTypeList: PokemonType[] = types.map((t) => ({
+  text: t.text,
+  color:t.color,
+}));
+
+export type PokemonTypeMap = Record<string, PokemonType>;
+
+export const pokemonTypeMap: PokemonTypeMap = pokemonTypeList.reduce((dict: PokemonTypeMap , t: PokemonType) => {
+	dict[t.text] = t;
+	return dict;
+}, {} as PokemonTypeMap);
+
+export const getPokemonType = (typeName: string): string => {
+	let pokemonType: PokemonType = pokemonTypeMap[typeName.toLowerCase()];
+	return pokemonType ? pokemonType.text : "Undefined"
+};
+
+export const getPokemonTypeColor = (typeName: string): string => {
+	let pokemonType: PokemonType = pokemonTypeMap[typeName.toLowerCase()];
+	return pokemonType ? pokemonType.color : "black"
+};
+
+export const emptySprite: string = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'

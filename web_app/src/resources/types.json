@@ -1,20 +1,96 @@
-[
-    "normal",
-    "fire",
-    "water",
-    "grass",
-    "flying",
-    "fighting",
-    "poison",
-    "electric",
-    "ground",
-    "rock",
-    "psychic",
-    "ice",
-    "bug",
-    "ghost",
-    "steel",
-    "dragon",
-    "dark", 
-    "fairy"
-]
+{
+	"types" : [
+		{
+			"text": "normal",
+			"color": "#A8A77A"
+		},
+		{
+			"text": "fire",
+			"color": "#EE8130"
+		},
+		{
+			"text": "water",
+			"color": "#6390F0"
+		},
+		{
+			"text": "grass",
+			"color": "#7AC74C"
+		},
+		{
+			"text": "flying",
+			"color": "#A98FF3"
+		},
+		{
+			"text": "fighting",
+			"color": "#C22E28"
+		},
+		{
+			"text": "poison",
+			"color": "#A33EA1"
+		},
+		{
+			"text": "electric",
+			"color": "#F7D02C"
+		},
+		{
+			"text": "ground",
+			"color": "#E2BF65"
+		},
+		{
+			"text": "rock",
+			"color": "#B6A136"
+		},
+		{
+			"text": "psychic",
+			"color": "#F95587"
+		},
+		{
+			"text": "ice",
+			"color": "#96D9D6"
+		},
+		{
+			"text": "bug",
+			"color": "#A6B91A"
+		},
+		{
+			"text": "ghost",
+			"color": "#735797"
+		},
+		{
+			"text": "steel",
+			"color": "#B7B7CE"
+		},
+		{
+			"text": "dragon",
+			"color": "#6F35FC"
+		},
+		{
+			"text": "dark",
+			"color": "#705746"
+		}, 
+		{
+			"text": "fairy",
+			"color": "#D685AD"
+		}
+	],
+    "typeNames" : {
+		"normal": "normal",
+		"fire": "fire",
+		"water": "water",
+		"grass": "grass",
+		"flying": "flying",
+		"fightin": "fighting",
+		"poison": "poison",
+		"electric": "electric",
+		"ground": "ground",
+		"rock": "rock",
+		"psychic": "psychic",
+		"ice": "ice",
+		"bug": "bug",
+		"ghost": "ghost",
+		"steel": "steel",
+		"dragon": "dragon",
+		"dark":  "dark",
+		"fairy": "fairy"
+	}
+}

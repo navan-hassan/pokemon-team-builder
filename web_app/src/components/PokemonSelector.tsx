@@ -1,11 +1,11 @@
-import { Box, Autocomplete, List, ListItem, Grid, TextField, ListItemAvatar, Avatar } from "@mui/material";
+import { Box, Autocomplete, List, ListItem, Grid, TextField, Avatar, Typography, Stack } from "@mui/material";
 
 import { RootState, AppDispatch } from "../redux/index";
 import { createTeam } from "../redux/PokemonTeamReducer";
 import { connect, ConnectedProps } from 'react-redux'
 import { pokemon } from "../interfaces";
 import StatList from "./StatList";
-import { emptySprite } from "../resources";
+import { asTitle, emptySprite, getPokemonType, getPokemonTypeColor } from "../resources";
 
 
 const mapStateToProps = (state: RootState) => {
@@ -67,11 +67,72 @@ const PokemonSelector = ({pokemonList, pokemonTeam, pokemonTeamId, createPokemon
                     id="combo-box-demo"
                     options={pokemonList ? pokemonList : []}
                     sx={{ width: 300 }}
-                    getOptionLabel={option => option.name}
+                    getOptionLabel={option => asTitle(option.name)}
                     onChange={(event: any, newValue: pokemon | null) => {
                       handleChange(index, newValue)
                     }}
-                    renderInput={(params) => <TextField {...params} label={isEmptySlot(pokemon) ? `Slot ${index+1}` : pokemon.name} />}
+                    renderOption={(props: any, option: pokemon)  => {
+                      const { key, ...optionProps } = props;
+                      return (
+                        <Box
+                          key={key}
+                          component="li"
+                          sx={{ '& > img': { mr: 2, flexShrink: 0 } }}
+                          // TODO: look into using a virtualization library to
+                          // reduce overhead of rendering thousands of combobox options
+                          {...optionProps}>
+                            <Stack>
+                              <Stack direction="row">
+                                
+                                <img
+                                  loading="lazy"
+                                  width="20"
+                                  srcSet={(option.sprite == null || option.sprite == "None") ? emptySprite : option.sprite}
+                                  src={(option.sprite == null || option.sprite == "None") ? emptySprite : option.sprite}
+                                  alt=""
+                                />
+                                <Typography
+                                      sx={{ display: 'inline' }}
+                                      component="span"
+                                      variant="body2"
+                                      fontWeight= 'bold'>
+                                      {`${asTitle(option.name)} `}
+                                </Typography>
+                              </Stack>
+                              {
+                                option.secondary_type === 'none' || option.secondary_type === null ? 
+                                <Typography
+                                  sx={{ display: 'inline' }}
+                                  component="span"
+                                  variant="body2"
+                                  color={`${getPokemonTypeColor(option.primary_type)}`}
+                                  fontWeight= 'bold'>
+                                  {`${getPokemonType(option.primary_type)}`}
+                                </Typography> :
+                                 <Stack direction="row" spacing={1}>
+                                  <Typography
+                                    sx={{ display: 'inline' }}
+                                    component="span"
+                                    variant="body2"
+                                    color={`${getPokemonTypeColor(option.primary_type)}`}
+                                    fontWeight= 'bold'>
+                                    {`${getPokemonType(option.primary_type)} `}
+                                  </Typography>
+                                  <Typography
+                                    sx={{ display: 'inline' }}
+                                    component="span"
+                                    variant="body2"
+                                    color={getPokemonTypeColor(option.secondary_type)}
+                                    fontWeight= 'bold'>
+                                    {` ${getPokemonType(option.secondary_type)}`}
+                                  </Typography>
+                                </Stack>
+                              }
+                            </Stack>
+                        </Box>
+                      );
+                    }}
+                    renderInput={(params) => <TextField {...params} label={isEmptySlot(pokemon) ? `Slot ${index+1}` : asTitle(pokemon.name)} />}
                   />
                   <Avatar alt={pokemon.name} sx={{ width: 100, height: 100 }} src={(pokemon.sprite == null || pokemon.sprite == "None") ? emptySprite : pokemon.sprite} />
                 
